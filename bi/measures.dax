@@ -1,0 +1,173 @@
+// ==============================================================================
+// CATÁLOGO DE MEDIDAS DAX - PROJETO FP&A & CONTROLADORIA INDUSTRIAL
+// Setor: Beneficiamento e Processamento de Tabaco
+// ==============================================================================
+
+// ------------------------------------------------------------------------------
+// PASTA DE EXIBIÇÃO: 01. Realizado & Orcado
+// ------------------------------------------------------------------------------
+
+[Realizado Total] = 
+// Calcula o montante total de lançamentos reais realizados no período selecionado
+SUM(Fatos_Lancamentos_Realizados[Valor_Realizado])
+
+[Orcado Total] = 
+// Calcula o montante total orçado para o período selecionado
+SUM(Fatos_Orcamento_Planejado[Valor_Orcado])
+
+[Realizado YTD] = 
+// Calcula o valor acumulado no ano fiscal até o período atual selecionado
+TOTALYTD(
+    [Realizado Total],
+    Dim_Calendario[Data]
+)
+
+[Orcado YTD] = 
+// Calcula o orçamento acumulado no ano fiscal até o período atual selecionado
+TOTALYTD(
+    [Orcado Total],
+    Dim_Calendario[Data]
+)
+
+[Realizado Ano Anterior (SPLY)] = 
+// Calcula o valor realizado no mesmo período do ano anterior para análise YoY
+CALCULATE(
+    [Realizado Total],
+    SAMEPERIODLASTYEAR(Dim_Calendario[Data])
+)
+
+
+// ------------------------------------------------------------------------------
+// PASTA DE EXIBIÇÃO: 02. Variancia & Desvios
+// ------------------------------------------------------------------------------
+
+[Variancia Nominal $] = 
+// Calcula a diferença líquida entre Realizado e Orçado
+[Realizado Total] - [Orcado Total]
+
+[Variancia %] = 
+// Calcula a variação percentual do Realizado em relação ao Orçado
+DIVIDE(
+    [Variancia Nominal $],
+    [Orcado Total],
+    0
+)
+
+[Variancia YTD $] = 
+// Calcula o desvio acumulado no ano fiscal
+[Realizado YTD] - [Orcado YTD]
+
+[Variancia YTD %] = 
+// Variação percentual acumulada no ano
+DIVIDE(
+    [Variancia YTD $],
+    [Orcado YTD],
+    0
+)
+
+
+// ------------------------------------------------------------------------------
+// PASTA DE EXIBIÇÃO: 03. Demonstrativo de Resultados (DRE Gerencial)
+// ------------------------------------------------------------------------------
+
+[Receita Bruta Real] = 
+// Soma das receitas brutas de exportação, mercado interno e subprodutos
+CALCULATE(
+    [Realizado Total],
+    Dim_PlanoContas[Nivel1] = "1. Receita Bruta"
+)
+
+[Deducoes Real] = 
+// Soma dos impostos e abatimentos incidentes sobre o faturamento
+CALCULATE(
+    [Realizado Total],
+    Dim_PlanoContas[Nivel1] = "2. Deducoes da Receita"
+)
+
+[Receita Liquida Real] = 
+// Receita Operacional Líquida (Receita Bruta deduzida dos tributos)
+[Receita Bruta Real] - [Deducoes Real]
+
+[CPV Industrial Real] = 
+// Custo total dos produtos vendidos (matéria-prima, mão de obra, utilidades fabris)
+CALCULATE(
+    [Realizado Total],
+    Dim_PlanoContas[Nivel1] = "3. Custo Industrial (CPV)"
+)
+
+[Margem Bruta Real] = 
+// Lucro Bruto Industrial após absorção dos custos fabris
+[Receita Liquida Real] - [CPV Industrial Real]
+
+[Margem Bruta %] = 
+// Percentual de Margem Bruta sobre a Receita Líquida
+DIVIDE(
+    [Margem Bruta Real],
+    [Receita Liquida Real],
+    0
+)
+
+[OPEX Real] = 
+// Despesas operacionais (logística de exportação, administrativo, TI, agronomia)
+CALCULATE(
+    [Realizado Total],
+    Dim_PlanoContas[Nivel1] = "4. Despesas Operacionais (OPEX)"
+)
+
+[EBITDA Gerencial Real] = 
+// Lucro Antes de Juros, Impostos, Depreciação e Amortização
+VAR _Depreciacao = 
+    CALCULATE(
+        [Realizado Total],
+        Dim_PlanoContas[ID_Conta] = "3.06.001"
+    )
+RETURN
+    ([Margem Bruta Real] - [OPEX Real]) + _Depreciacao
+
+[Margem EBITDA %] = 
+// Percentual de margem EBITDA sobre a Receita Líquida
+DIVIDE(
+    [EBITDA Gerencial Real],
+    [Receita Liquida Real],
+    0
+)
+
+[Resultado Financeiro Real] = 
+// Efeito financeiro líquido (Variação Cambial + Aplicações - Juros de Dívida)
+VAR _ReceitasFin = 
+    CALCULATE(
+        [Realizado Total],
+        Dim_PlanoContas[ID_Conta] IN {"5.01.001", "5.03.001"}
+    )
+VAR _DespesasFin = 
+    CALCULATE(
+        [Realizado Total],
+        Dim_PlanoContas[ID_Conta] = "5.02.001"
+    )
+RETURN
+    _ReceitasFin - _DespesasFin
+
+
+// ------------------------------------------------------------------------------
+// PASTA DE EXIBIÇÃO: 04. Auxiliares & Formatacao
+// ------------------------------------------------------------------------------
+
+[Cor Status Variancia EBITDA] = 
+// Retorna cor hexadecimal para formatação condicional (#009E49 Favorável / #E74C3C Desfavorável)
+IF(
+    [EBITDA Gerencial Real] >= [Orcado Total],
+    "#009E49",
+    "#E74C3C"
+)
+
+[DRE Valor Customizado] = 
+// Medida comutada para exibição hierárquica em matriz contábil respeitando o sinal das contas
+VAR _Ordem = SELECTEDVALUE(Dim_PlanoContas[Ordem_DRE])
+VAR _Natureza = SELECTEDVALUE(Dim_PlanoContas[Natureza])
+VAR _Valor = [Realizado Total]
+RETURN
+    IF(
+        _Natureza = "Debito",
+        -_Valor,
+        _Valor
+    )

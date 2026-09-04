@@ -1,0 +1,11 @@
+﻿ID_CentroCusto;Nome_CentroCusto;Tipo_Unidade;Area_Negocio
+CC1001;Recepcao e Classificacao de Folhas;Fabrica;Operacoes Fabris
+CC1002;Linha de Debulha e Separacao (Threshing);Fabrica;Operacoes Fabris
+CC1003;Secadores Continuos e Redryer;Fabrica;Operacoes Fabris
+CC1004;Prensagem, Embalagem e Armazens C-48;Fabrica;Operacoes Fabris
+CC1005;Manutencao Industrial e Caldeiras;Fabrica;Suporte Fabril
+CC2001;Logistica, Fretes e Embarque Portuario;Operacional;Logistica
+CC3001;Diretoria Executiva e Controladoria;Matriz Corporativa;Corporativo
+CC3002;Tecnologia da Informacao e Seguranca;Matriz Corporativa;Suporte Corporativo
+CC3003;Recursos Humanos e Saude Ocupacional;Matriz Corporativa;Suporte Corporativo
+CC4001;Mesa de Trading e Vendas Globais;Comercial;Comercial

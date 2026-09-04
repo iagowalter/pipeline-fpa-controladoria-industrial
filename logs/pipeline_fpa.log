@@ -1,0 +1,38 @@
+2026-09-04 14:33:17 [INFO] (etl_pipeline) ================================================================================
+2026-09-04 14:33:17 [INFO] (etl_pipeline) INICIANDO EXECUÇÃO DO PIPELINE DE ENGENHARIA DE DADOS - FP&A INDUSTRIAL
+2026-09-04 14:33:17 [INFO] (etl_pipeline) ================================================================================
+2026-09-04 14:33:17 [INFO] (generator) Iniciando geração de Fatos Orçado e Realizado com curvas sazonais de beneficiamento...
+2026-09-04 14:33:17 [INFO] (generator) Gerando Dimensão Plano de Contas...
+2026-09-04 14:33:17 [INFO] (generator) Dim_PlanoContas gerada com 21 contas.
+2026-09-04 14:33:17 [INFO] (generator) Gerando Dimensão Centros de Custo...
+2026-09-04 14:33:17 [INFO] (generator) Dim_CentroCusto gerada com 10 centros de custo.
+2026-09-04 14:33:17 [INFO] (generator) Gerando Dimensão Calendário (2024 a 2026)...
+2026-09-04 14:33:17 [INFO] (generator) Dim_Calendario gerada com 1096 dias.
+2026-09-04 14:33:17 [INFO] (generator) Fatos_Orcamento_Planejado gerada com 1008 registros.
+2026-09-04 14:33:17 [INFO] (generator) Fatos_Lancamentos_Realizados gerada com 7544 lançamentos diários.
+2026-09-04 14:33:17 [INFO] (etl_pipeline) Aplicando regra de rateio de despesas corporativas para a operação fabril...
+2026-09-04 14:33:18 [INFO] (etl_pipeline) Gerados 2304 lançamentos contábeis de rateio de despesas indiretas.
+2026-09-04 14:33:18 [INFO] (etl_pipeline) Criando esquema relacional (Star Schema) no Data Warehouse SQLite...
+2026-09-04 14:33:18 [INFO] (etl_pipeline) Esquema DDL e índices criados com sucesso no banco de dados.
+2026-09-04 14:33:18 [INFO] (etl_pipeline) Populando tabelas relacionais do Data Warehouse...
+2026-09-04 14:33:18 [INFO] (etl_pipeline) Carga relacional no SQLite concluída com sucesso.
+2026-09-04 14:33:18 [INFO] (etl_pipeline) Exportando datasets formatados em CSV para consumo no Power BI...
+2026-09-04 14:33:18 [INFO] (etl_pipeline) ================================================================================
+2026-09-04 14:33:18 [INFO] (etl_pipeline) PIPELINE EXECUTADO COM SUCESSO EM 0.47 SEGUNDOS.
+2026-09-04 14:33:18 [INFO] (etl_pipeline) Total de Contas: 21 | Centros de Custo: 10
+2026-09-04 14:33:18 [INFO] (etl_pipeline) Total de Orçamentos Mensais: 1008 | Lançamentos Reais: 7544
+2026-09-04 14:33:18 [INFO] (etl_pipeline) ================================================================================
+2026-09-04 14:33:21 [INFO] (data_quality) ================================================================================
+2026-09-04 14:33:21 [INFO] (data_quality) INICIANDO SUÍTE DE TESTES DE DATA QUALITY & AUDITORIA CONTÁBIL
+2026-09-04 14:33:21 [INFO] (data_quality) ================================================================================
+2026-09-04 14:33:21 [INFO] (data_quality) TESTE 'Fatos_Lancamentos_Realizados - Nulos em Chaves': APROVADO [PASS] - Registros com chave nula encontrados: 0
+2026-09-04 14:33:21 [INFO] (data_quality) TESTE 'Fatos_Orcamento_Planejado - Nulos em Chaves': APROVADO [PASS] - Registros com chave nula encontrados: 0
+2026-09-04 14:33:21 [INFO] (data_quality) TESTE 'Integridade Referencial - Contas Contábeis (Realizado)': APROVADO [PASS] - Chaves órfãs identificadas: 0
+2026-09-04 14:33:21 [INFO] (data_quality) TESTE 'Integridade Referencial - Centros de Custo (Realizado)': APROVADO [PASS] - Chaves órfãs identificadas: 0
+2026-09-04 14:33:21 [INFO] (data_quality) TESTE 'Integridade Referencial - Contas Contábeis (Orçamento)': APROVADO [PASS] - Chaves órfãs identificadas: 0
+2026-09-04 14:33:21 [INFO] (data_quality) TESTE 'Integridade Referencial - Centros de Custo (Orçamento)': APROVADO [PASS] - Chaves órfãs identificadas: 0
+2026-09-04 14:33:21 [INFO] (data_quality) TESTE 'Consistência de Valores Positivos (Realizado)': APROVADO [PASS] - Lançamentos com valor zero ou negativo: 0
+2026-09-04 14:33:21 [INFO] (data_quality) TESTE 'Limites Temporais do Calendário': APROVADO [PASS] - Intervalo observado: 2024-01-01 a 2026-12-31
+2026-09-04 14:33:21 [INFO] (data_quality) ================================================================================
+2026-09-04 14:33:21 [INFO] (data_quality) AUDITORIA CONCLUÍDA. RESULTADO GERAL: 100% APROVADO
+2026-09-04 14:33:21 [INFO] (data_quality) ================================================================================
