@@ -1,12 +1,14 @@
 """
 Módulo de Geração de Dados Sintéticos de FP&A e Controladoria Industrial
-Setor: Indústria de Beneficiamento e Processamento de Tabaco
+Empresa Referência: Alliance One Brasil (Polo Venâncio Aires - RS)
+Modelo de Negócio: Leaf Merchant (Processamento, Beneficiamento e Exportação de Tabaco em Folha)
 
-Este script gera dados contábeis realistas para o período de 2024 a 2026:
-1. Plano de Contas Gerencial (Hierarquia contábil padronizada)
-2. Centros de Custo Fabris e Corporativos
-3. Fato Orçamento Planejado (Granularidade Mensal por Centro de Custo/Conta)
-4. Fato Lançamentos Contábeis Reais (Livro Razão / GL Diário com Sazonalidade de Safra)
+Gera dados contábeis e operacionais realistas para o período de 2024 a 2026:
+- 95%+ da receita atrelada à Exportação de Strips (Lâmina Virgínia/Burley) e By-products
+- CPV concentrado na compra de safra de produtores integrados do Sul (RS/SC/PR)
+- Custos industriais de Threshing (Debulha), Redryer (Secagem), Caldeiras e Caixas C-48
+- Frete rodoviário e custos portuários no Porto de Rio Grande (RS)
+- Financiamento via ACC/ACE (Adiantamento sobre Contratos de Câmbio) e Hedge cambial
 """
 
 import random
@@ -17,72 +19,74 @@ import numpy as np
 from pathlib import Path
 from config import get_logger, DATA_DIR
 
-logger = get_logger("data_generator")
+logger = get_logger("generator_alliance_one")
 
-# Fixação da semente para reprodutibilidade matemática dos dados
+# Fixação da semente para consistência matemática
 random.seed(42)
 np.random.seed(42)
 
 def generate_chart_of_accounts() -> pd.DataFrame:
     """
-    Gera o Plano de Contas Gerencial padronizado para a indústria de tabaco.
-    Organizado em hierarquia estruturada para formação da DRE Contábil.
+    Gera o Plano de Contas Gerencial estruturado para a operação de processamento
+    e exportação de tabaco em folha (Alliance One - Polo Venâncio Aires).
     """
-    logger.info("Gerando Dimensão Plano de Contas...")
+    logger.info("Gerando Plano de Contas Gerencial - Alliance One (Venâncio Aires)...")
     accounts = [
-        # 1. RECEITA OPERACIONAL BRUTA
-        {"ID_Conta": "1.01.001", "Nome_Conta": "Venda Tabaco Processado - Exportacao", "Nivel1": "1. Receita Bruta", "Nivel2": "Receita de Exportacao", "Natureza": "Credito", "Ordem_DRE": 1},
-        {"ID_Conta": "1.01.002", "Nome_Conta": "Venda Tabaco Processado - Mercado Interno", "Nivel1": "1. Receita Bruta", "Nivel2": "Receita Mercado Interno", "Natureza": "Credito", "Ordem_DRE": 2},
-        {"ID_Conta": "1.02.001", "Nome_Conta": "Venda de Subprodutos (Talas e Fumos Picados)", "Nivel1": "1. Receita Bruta", "Nivel2": "Outras Receitas Operacionais", "Natureza": "Credito", "Ordem_DRE": 3},
+        # 1. RECEITA OPERACIONAL BRUTA (95%+ EXPORTAÇÃO)
+        {"ID_Conta": "1.01.001", "Nome_Conta": "Exportacao Tabaco Processado - Strips Virginia", "Nivel1": "1. Receita Bruta", "Nivel2": "Receita de Exportacao", "Natureza": "Credito", "Ordem_DRE": 1},
+        {"ID_Conta": "1.01.002", "Nome_Conta": "Exportacao Tabaco Processado - Strips Burley", "Nivel1": "1. Receita Bruta", "Nivel2": "Receita de Exportacao", "Natureza": "Credito", "Ordem_DRE": 2},
+        {"ID_Conta": "1.01.003", "Nome_Conta": "Exportacao de By-Products (Stems/Talas e Fumos Picados)", "Nivel1": "1. Receita Bruta", "Nivel2": "Receita de Exportacao", "Natureza": "Credito", "Ordem_DRE": 3},
+        {"ID_Conta": "1.02.001", "Nome_Conta": "Vendas no Mercado Interno e Amostras Comerciais", "Nivel1": "1. Receita Bruta", "Nivel2": "Receita Mercado Interno", "Natureza": "Credito", "Ordem_DRE": 4},
         
         # 2. DEDUÇÕES DA RECEITA
-        {"ID_Conta": "2.01.001", "Nome_Conta": "Impostos sobre Faturamento (PIS, COFINS, ICMS)", "Nivel1": "2. Deducoes da Receita", "Nivel2": "Impostos Incidentes", "Natureza": "Debito", "Ordem_DRE": 4},
-        {"ID_Conta": "2.02.001", "Nome_Conta": "Devolucoes e Abatimentos de Exportacao", "Nivel1": "2. Deducoes da Receita", "Nivel2": "Cancelamentos e Abatimentos", "Natureza": "Debito", "Ordem_DRE": 5},
+        {"ID_Conta": "2.01.001", "Nome_Conta": "Tributos sobre Faturamento Interno (PIS/COFINS/ICMS)", "Nivel1": "2. Deducoes da Receita", "Nivel2": "Impostos Incidentes", "Natureza": "Debito", "Ordem_DRE": 5},
+        {"ID_Conta": "2.02.001", "Nome_Conta": "Descontos Comerciais e Reclamacoes de Umidade/Qualidade", "Nivel1": "2. Deducoes da Receita", "Nivel2": "Cancelamentos e Abatimentos", "Natureza": "Debito", "Ordem_DRE": 6},
 
-        # 3. CUSTO DOS PRODUTOS VENDIDOS (CPV INDUSTRIAL)
-        {"ID_Conta": "3.01.001", "Nome_Conta": "Compra de Tabaco em Folha (Materia-Prima Safra)", "Nivel1": "3. Custo Industrial (CPV)", "Nivel2": "Materia-Prima Direta", "Natureza": "Debito", "Ordem_DRE": 6},
-        {"ID_Conta": "3.02.001", "Nome_Conta": "Mao de Obra Direta Industrial (Debulha e Cura)", "Nivel1": "3. Custo Industrial (CPV)", "Nivel2": "Mao de Obra Fabril", "Natureza": "Debito", "Ordem_DRE": 7},
-        {"ID_Conta": "3.03.001", "Nome_Conta": "Energia Eletrica Fabril e Vapor/Caldeiras", "Nivel1": "3. Custo Industrial (CPV)", "Nivel2": "Utilidades Industriais", "Natureza": "Debito", "Ordem_DRE": 8},
-        {"ID_Conta": "3.04.001", "Nome_Conta": "Insumos de Embalagem (Caixas C-48 e Cintas)", "Nivel1": "3. Custo Industrial (CPV)", "Nivel2": "Embalagens e Insumos", "Natureza": "Debito", "Ordem_DRE": 9},
-        {"ID_Conta": "3.05.001", "Nome_Conta": "Manutencao Industrial Preditiva e Corretiva", "Nivel1": "3. Custo Industrial (CPV)", "Nivel2": "Manutencao Fabril", "Natureza": "Debito", "Ordem_DRE": 10},
-        {"ID_Conta": "3.06.001", "Nome_Conta": "Depreciacao de Linhas de Debulha e Secadores", "Nivel1": "3. Custo Industrial (CPV)", "Nivel2": "Depreciacao Industrial", "Natureza": "Debito", "Ordem_DRE": 11},
+        # 3. CUSTO DOS PRODUTOS VENDIDOS (CPV / PROCESSAMENTO INDUSTRIAL VENÂNCIO AIRES)
+        {"ID_Conta": "3.01.001", "Nome_Conta": "Aquisicao de Tabaco Cru (Produtores Integrados Sul)", "Nivel1": "3. Custo Industrial (CPV)", "Nivel2": "Materia-Prima Direta", "Natureza": "Debito", "Ordem_DRE": 7},
+        {"ID_Conta": "3.02.001", "Nome_Conta": "Mao de Obra Direta Fabril (Linhas Threshing e Prensas)", "Nivel1": "3. Custo Industrial (CPV)", "Nivel2": "Mao de Obra Fabril", "Natureza": "Debito", "Ordem_DRE": 8},
+        {"ID_Conta": "3.03.001", "Nome_Conta": "Utilidades Industriais (Caldeiras a Biomassa, Vapor e Energia)", "Nivel1": "3. Custo Industrial (CPV)", "Nivel2": "Utilidades Fabris", "Natureza": "Debito", "Ordem_DRE": 9},
+        {"ID_Conta": "3.04.001", "Nome_Conta": "Embalagens de Exportacao (Caixas C-48, Liners e Cintas)", "Nivel1": "3. Custo Industrial (CPV)", "Nivel2": "Embalagens e Insumos", "Natureza": "Debito", "Ordem_DRE": 10},
+        {"ID_Conta": "3.05.001", "Nome_Conta": "Manutencao Industrial Preditiva das Linhas de Debulha", "Nivel1": "3. Custo Industrial (CPV)", "Nivel2": "Manutencao Fabril", "Natureza": "Debito", "Ordem_DRE": 11},
+        {"ID_Conta": "3.06.001", "Nome_Conta": "Depreciacao Fabril (Linhas Threshing, Redryers e Silos)", "Nivel1": "3. Custo Industrial (CPV)", "Nivel2": "Depreciacao Fabril", "Natureza": "Debito", "Ordem_DRE": 12},
 
-        # 4. DESPESAS OPERACIONAIS (OPEX)
-        {"ID_Conta": "4.01.001", "Nome_Conta": "Fretes Internacionais e Terminal Portuario", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Logistica e Embarque", "Natureza": "Debito", "Ordem_DRE": 12},
-        {"ID_Conta": "4.02.001", "Nome_Conta": "Folha de Pagamento Administrativa e Gestao", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Despesas Corporativas", "Natureza": "Debito", "Ordem_DRE": 13},
-        {"ID_Conta": "4.03.001", "Nome_Conta": "Licencas de Software, TI e Infraestrutura", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Tecnologia da Informacao", "Natureza": "Debito", "Ordem_DRE": 14},
-        {"ID_Conta": "4.04.001", "Nome_Conta": "Laudos Agronomicos e Certificacoes Fitossanitarias", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Qualidade e Agronomia", "Natureza": "Debito", "Ordem_DRE": 15},
-        {"ID_Conta": "4.05.001", "Nome_Conta": "Viagens Comerciais e Prospeccao Global", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Comercial e Vendas", "Natureza": "Debito", "Ordem_DRE": 16},
-        {"ID_Conta": "4.06.001", "Nome_Conta": "Seguranca Patrimonial e Manutencao Predial", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Facilities e Ocupacao", "Natureza": "Debito", "Ordem_DRE": 17},
+        # 4. DESPESAS OPERACIONAIS (OPEX & LOGÍSTICA DE EXPORTAÇÃO)
+        {"ID_Conta": "4.01.001", "Nome_Conta": "Fretes Rodoviarios (Venancio Aires -> Porto de Rio Grande)", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Logistica e Exportacao", "Natureza": "Debito", "Ordem_DRE": 13},
+        {"ID_Conta": "4.01.002", "Nome_Conta": "Custos Portuarios, Estufagem e Terminal Alfandegado", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Logistica e Exportacao", "Natureza": "Debito", "Ordem_DRE": 14},
+        {"ID_Conta": "4.02.001", "Nome_Conta": "Assistente Tecnico de Campo e Programa STP (Agronomia/ESG)", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Agronomia e Sustentabilidade", "Natureza": "Debito", "Ordem_DRE": 15},
+        {"ID_Conta": "4.03.001", "Nome_Conta": "Folha de Pagamento Administrativa e Gestao Corporativa", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Despesas Corporativas", "Natureza": "Debito", "Ordem_DRE": 16},
+        {"ID_Conta": "4.04.001", "Nome_Conta": "Tecnologia da Informacao, ERP e Automacao Fabril", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Tecnologia da Informacao", "Natureza": "Debito", "Ordem_DRE": 17},
+        {"ID_Conta": "4.05.001", "Nome_Conta": "Laudos Fitossanitarios, Laboratorio de Fumo e Qualidade", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Qualidade e Laboratorio", "Natureza": "Debito", "Ordem_DRE": 18},
+        {"ID_Conta": "4.06.001", "Nome_Conta": "Mesa Comercial Internacional e Negociacao de Safras", "Nivel1": "4. Despesas Operacionais (OPEX)", "Nivel2": "Comercial e Vendas", "Natureza": "Debito", "Ordem_DRE": 19},
 
-        # 5. RESULTADO FINANCEIRO
-        {"ID_Conta": "5.01.001", "Nome_Conta": "Variacao Cambial Liquida (Contratos de Exportacao)", "Nivel1": "5. Resultado Financeiro", "Nivel2": "Efeito Cambial", "Natureza": "Credito", "Ordem_DRE": 18},
-        {"ID_Conta": "5.02.001", "Nome_Conta": "Despesas Financeiras e Juros de Capital de Giro", "Nivel1": "5. Resultado Financeiro", "Nivel2": "Despesas Bancarias", "Natureza": "Debito", "Ordem_DRE": 19},
-        {"ID_Conta": "5.03.001", "Nome_Conta": "Receitas de Aplicacoes Financeiras de Curto Prazo", "Nivel1": "5. Resultado Financeiro", "Nivel2": "Receitas Financeiras", "Natureza": "Credito", "Ordem_DRE": 20},
+        # 5. RESULTADO FINANCEIRO (ACC / HEDGE CAMBIAL)
+        {"ID_Conta": "5.01.001", "Nome_Conta": "Variacao Cambial Liquida (Contratos de Exportacao USD)", "Nivel1": "5. Resultado Financeiro", "Nivel2": "Efeito Cambial", "Natureza": "Credito", "Ordem_DRE": 20},
+        {"ID_Conta": "5.02.001", "Nome_Conta": "Juros e Despesas com Antecipacao Cambial (ACC / ACE)", "Nivel1": "5. Resultado Financeiro", "Nivel2": "Despesas Bancarias", "Natureza": "Debito", "Ordem_DRE": 21},
+        {"ID_Conta": "5.03.001", "Nome_Conta": "Rendimento de Aplicacoes Financeiras de Tesouraria", "Nivel1": "5. Resultado Financeiro", "Nivel2": "Receitas Financeiras", "Natureza": "Credito", "Ordem_DRE": 22},
 
         # 6. TRIBUTOS SOBRE O LUCRO
-        {"ID_Conta": "6.01.001", "Nome_Conta": "Provisao de IRPJ e CSLL", "Nivel1": "6. Provisao Tributaria", "Nivel2": "Impostos Diretos", "Natureza": "Debito", "Ordem_DRE": 21}
+        {"ID_Conta": "6.01.001", "Nome_Conta": "Provisao de IRPJ e CSLL", "Nivel1": "6. Provisao Tributaria", "Nivel2": "Impostos Diretos", "Natureza": "Debito", "Ordem_DRE": 23}
     ]
     df = pd.DataFrame(accounts)
-    logger.info(f"Dim_PlanoContas gerada com {len(df)} contas.")
+    logger.info(f"Dim_PlanoContas gerada com {len(df)} contas estruturadas.")
     return df
 
 def generate_cost_centers() -> pd.DataFrame:
     """
-    Gera a Dimensão de Centros de Custo (Fabris, Operacionais e Corporativos).
+    Gera a Dimensão de Centros de Custo específicos da planta de Venâncio Aires (RS).
     """
-    logger.info("Gerando Dimensão Centros de Custo...")
+    logger.info("Gerando Centros de Custo - Planta Venâncio Aires...")
     cost_centers = [
-        {"ID_CentroCusto": "CC1001", "Nome_CentroCusto": "Recepcao e Classificacao de Folhas", "Tipo_Unidade": "Fabrica", "Area_Negocio": "Operacoes Fabris"},
-        {"ID_CentroCusto": "CC1002", "Nome_CentroCusto": "Linha de Debulha e Separacao (Threshing)", "Tipo_Unidade": "Fabrica", "Area_Negocio": "Operacoes Fabris"},
-        {"ID_CentroCusto": "CC1003", "Nome_CentroCusto": "Secadores Continuos e Redryer", "Tipo_Unidade": "Fabrica", "Area_Negocio": "Operacoes Fabris"},
-        {"ID_CentroCusto": "CC1004", "Nome_CentroCusto": "Prensagem, Embalagem e Armazens C-48", "Tipo_Unidade": "Fabrica", "Area_Negocio": "Operacoes Fabris"},
-        {"ID_CentroCusto": "CC1005", "Nome_CentroCusto": "Manutencao Industrial e Caldeiras", "Tipo_Unidade": "Fabrica", "Area_Negocio": "Suporte Fabril"},
-        {"ID_CentroCusto": "CC2001", "Nome_CentroCusto": "Logistica, Fretes e Embarque Portuario", "Tipo_Unidade": "Operacional", "Area_Negocio": "Logistica"},
-        {"ID_CentroCusto": "CC3001", "Nome_CentroCusto": "Diretoria Executiva e Controladoria", "Tipo_Unidade": "Matriz Corporativa", "Area_Negocio": "Corporativo"},
-        {"ID_CentroCusto": "CC3002", "Nome_CentroCusto": "Tecnologia da Informacao e Seguranca", "Tipo_Unidade": "Matriz Corporativa", "Area_Negocio": "Suporte Corporativo"},
-        {"ID_CentroCusto": "CC3003", "Nome_CentroCusto": "Recursos Humanos e Saude Ocupacional", "Tipo_Unidade": "Matriz Corporativa", "Area_Negocio": "Suporte Corporativo"},
-        {"ID_CentroCusto": "CC4001", "Nome_CentroCusto": "Mesa de Trading e Vendas Globais", "Tipo_Unidade": "Comercial", "Area_Negocio": "Comercial"}
+        {"ID_CentroCusto": "CC1001", "Nome_CentroCusto": "Recepcao, Pesagem e Classificacao de Fumo Cru", "Tipo_Unidade": "Fabrica Venancio Aires", "Area_Negocio": "Operacoes Fabris"},
+        {"ID_CentroCusto": "CC1002", "Nome_CentroCusto": "Linha de Debulha Mecanica (Threshing Lines)", "Tipo_Unidade": "Fabrica Venancio Aires", "Area_Negocio": "Operacoes Fabris"},
+        {"ID_CentroCusto": "CC1003", "Nome_CentroCusto": "Secadores Continuos e Redryers (Controle Umidade)", "Tipo_Unidade": "Fabrica Venancio Aires", "Area_Negocio": "Operacoes Fabris"},
+        {"ID_CentroCusto": "CC1004", "Nome_CentroCusto": "Prensagem, Embalagem Caixas C-48 e Silos", "Tipo_Unidade": "Fabrica Venancio Aires", "Area_Negocio": "Operacoes Fabris"},
+        {"ID_CentroCusto": "CC1005", "Nome_CentroCusto": "Manutencao Industrial, Vapor e Caldeiras Biomassa", "Tipo_Unidade": "Fabrica Venancio Aires", "Area_Negocio": "Suporte Fabril"},
+        {"ID_CentroCusto": "CC2001", "Nome_CentroCusto": "Logistica de Conteineres e Terminal Porto Rio Grande", "Tipo_Unidade": "Operacional", "Area_Negocio": "Logistica Exportacao"},
+        {"ID_CentroCusto": "CC2002", "Nome_CentroCusto": "Orientacao Tecnica Agronomica e Programa STP (Campo)", "Tipo_Unidade": "Operacional", "Area_Negocio": "Agronomia e Campo"},
+        {"ID_CentroCusto": "CC3001", "Nome_CentroCusto": "Sede Venancio Aires - Diretoria, FP&A e Controladoria", "Tipo_Unidade": "Sede Administrativa", "Area_Negocio": "Corporativo"},
+        {"ID_CentroCusto": "CC3002", "Nome_CentroCusto": "TI Corporativa, Automacao Fabril e Seguranca", "Tipo_Unidade": "Sede Administrativa", "Area_Negocio": "Suporte Corporativo"},
+        {"ID_CentroCusto": "CC4001", "Nome_CentroCusto": "Mesa de Trading Global e Atendimento a Clientes", "Tipo_Unidade": "Comercial", "Area_Negocio": "Comercial Internacional"}
     ]
     df = pd.DataFrame(cost_centers)
     logger.info(f"Dim_CentroCusto gerada com {len(df)} centros de custo.")
@@ -90,9 +94,9 @@ def generate_cost_centers() -> pd.DataFrame:
 
 def generate_calendar(start_year: int = 2024, end_year: int = 2026) -> pd.DataFrame:
     """
-    Gera a Dimensão Calendário cobrindo o período fiscal de análise.
+    Gera a Dimensão Calendário cobrindo as Safras 2024 a 2026.
     """
-    logger.info(f"Gerando Dimensão Calendário ({start_year} a {end_year})...")
+    logger.info(f"Gerando Calendário Fiscal e de Safras ({start_year} a {end_year})...")
     start_date = datetime.date(start_year, 1, 1)
     end_date = datetime.date(end_year, 12, 31)
     
@@ -108,26 +112,25 @@ def generate_calendar(start_year: int = 2024, end_year: int = 2026) -> pd.DataFr
     df["Semestre"] = np.where(df["Mes"] <= 6, 1, 2)
     df["Safra_Ano"] = "Safra " + df["Ano"].astype(str)
     
-    logger.info(f"Dim_Calendario gerada com {len(df)} dias.")
     return df
 
 def generate_fpa_data(start_year: int = 2024, end_year: int = 2026):
     """
-    Gera as tabelas de fatos:
+    Gera as tabelas de fatos com o perfil operacional da Alliance One Venâncio Aires:
     1. Fatos_Orcamento_Planejado (Mensal)
-    2. Fatos_Lancamentos_Realizados (Diário)
+    2. Fatos_Lancamentos_Realizados (Diário com variações industriais e de câmbio)
     """
-    logger.info("Iniciando geração de Fatos Orçado e Realizado com curvas sazonais de beneficiamento...")
+    logger.info("Gerando Fatos de Orçado e Realizado para Alliance One (Venâncio Aires)...")
     
     df_accounts = generate_chart_of_accounts()
     df_cc = generate_cost_centers()
     df_cal = generate_calendar(start_year, end_year)
     
-    # Mapeamento de contas com seus centros de custo padrão
     account_cc_map = {
         "1.01.001": ["CC4001"],
         "1.01.002": ["CC4001"],
-        "1.02.001": ["CC1004"],
+        "1.01.003": ["CC4001"],
+        "1.02.001": ["CC4001"],
         "2.01.001": ["CC3001"],
         "2.02.001": ["CC4001"],
         "3.01.001": ["CC1001"],
@@ -137,46 +140,50 @@ def generate_fpa_data(start_year: int = 2024, end_year: int = 2026):
         "3.05.001": ["CC1005"],
         "3.06.001": ["CC1002", "CC1003"],
         "4.01.001": ["CC2001"],
-        "4.02.001": ["CC3001", "CC3003"],
-        "4.03.001": ["CC3002"],
-        "4.04.001": ["CC1001", "CC3001"],
-        "4.05.001": ["CC4001"],
-        "4.06.001": ["CC3001", "CC1005"],
+        "4.01.002": ["CC2001"],
+        "4.02.001": ["CC2002"],
+        "4.03.001": ["CC3001"],
+        "4.04.001": ["CC3002"],
+        "4.05.001": ["CC1001", "CC3001"],
+        "4.06.001": ["CC4001"],
         "5.01.001": ["CC3001"],
         "5.02.001": ["CC3001"],
         "5.03.001": ["CC3001"],
         "6.01.001": ["CC3001"]
     }
     
-    # Valores base mensais médios (R$)
+    # Valores base mensais (R$) representativos de uma operação de médio/grande porte
     base_values = {
-        "1.01.001": 28500000.0, # Receita Exportação
-        "1.01.002": 3200000.0,  # Receita Mercado Interno
-        "1.02.001": 850000.0,   # Subprodutos
-        "2.01.001": 2800000.0,  # Impostos
-        "2.02.001": 150000.0,   # Devoluções
-        "3.01.001": 14500000.0, # Compra de Tabaco Cru
-        "3.02.001": 2200000.0,  # MOD Fabril
-        "3.03.001": 950000.0,   # Energia e Caldeiras
-        "3.04.001": 650000.0,   # Embalagens C-48
-        "3.05.001": 480000.0,   # Manutenção Industrial
-        "3.06.001": 720000.0,   # Depreciação
-        "4.01.001": 1450000.0,  # Logística / Frete Porto Rio Grande
-        "4.02.001": 550000.0,   # Pessoal Administrativo
-        "4.03.001": 220000.0,   # TI / Licenças
-        "4.04.001": 180000.0,   # Agronomia e Qualidade
-        "4.05.001": 190000.0,   # Comercial / Viagens
-        "4.06.001": 140000.0,   # Facilities
-        "5.01.001": 450000.0,   # Variação Cambial
-        "5.02.001": 380000.0,   # Juros Capital de Giro
-        "5.03.001": 110000.0,   # Aplicações Financeiras
-        "6.01.001": 1250000.0   # IRPJ / CSLL
+        "1.01.001": 34500000.0, # Exportação Strips Virgínia
+        "1.01.002": 11200000.0, # Exportação Strips Burley
+        "1.01.003": 2800000.0,  # Exportação Talas/By-Products
+        "1.02.001": 950000.0,   # Mercado Interno/Amostras
+        "2.01.001": 420000.0,   # Tributos Faturamento Interno (Exportação é imune de ICMS/PIS/COFINS)
+        "2.02.001": 210000.0,   # Abatimentos/Ajustes de Umidade
+        "3.01.001": 22500000.0, # Compra de Fumo Cru dos Produtores
+        "3.02.001": 3400000.0,  # MOD Linhas de Debulha/Prensagem
+        "3.03.001": 1350000.0,  # Caldeiras Biomassa, Vapor e Energia
+        "3.04.001": 980000.0,   # Caixas C-48 e Embalagens
+        "3.05.001": 680000.0,   # Manutenção Linhas Threshing
+        "3.06.001": 920000.0,   # Depreciação Maquinário
+        "4.01.001": 1850000.0,  # Fretes Rodoviários Venâncio -> Porto Rio Grande
+        "4.01.002": 720000.0,   # Custos Portuários e Terminal Alfandegado
+        "4.02.001": 480000.0,   # Agronomia de Campo / Programa STP
+        "4.03.001": 850000.0,   # Folha Administrativa Sede
+        "4.04.001": 320000.0,   # TI e Automação
+        "4.05.001": 210000.0,   # Laboratório de Fumo e Qualidade
+        "4.06.001": 280000.0,   # Comercial Internacional
+        "5.01.001": 650000.0,   # Variação Cambial Exportação USD
+        "5.02.001": 520000.0,   # Despesas Financeiras ACC/ACE
+        "5.03.001": 140000.0,   # Aplicações Tesouraria
+        "6.01.001": 1650000.0   # IRPJ / CSLL
     }
     
-    # Sazonalidade de Safra de Tabaco (Meses 3 a 7: Pico de compra e beneficiamento)
-    seasonality_cpv = {1: 0.4, 2: 0.6, 3: 1.5, 4: 1.8, 5: 1.7, 6: 1.6, 7: 1.4, 8: 1.0, 9: 0.8, 10: 0.5, 11: 0.4, 12: 0.3}
-    # Sazonalidade de Exportação (Meses 5 a 11: Embarques concentrados no Porto)
-    seasonality_rev = {1: 0.5, 2: 0.6, 3: 0.7, 4: 0.9, 5: 1.3, 6: 1.5, 7: 1.6, 8: 1.5, 9: 1.4, 10: 1.2, 11: 1.0, 12: 0.8}
+    # Curvas Sazonais:
+    # 1. Safra de Compra e Processamento Fabril (Pico de Março a Julho em Venâncio Aires)
+    seasonality_cpv = {1: 0.35, 2: 0.55, 3: 1.55, 4: 1.85, 5: 1.75, 6: 1.65, 7: 1.40, 8: 0.95, 9: 0.75, 10: 0.50, 11: 0.40, 12: 0.30}
+    # 2. Embarques de Exportação no Porto de Rio Grande (Pico de Maio a Novembro)
+    seasonality_export = {1: 0.45, 2: 0.55, 3: 0.70, 4: 0.90, 5: 1.30, 6: 1.55, 7: 1.65, 8: 1.60, 9: 1.45, 10: 1.25, 11: 0.95, 12: 0.65}
     seasonality_flat = {m: 1.0 for m in range(1, 13)}
     
     budget_records = []
@@ -190,27 +197,23 @@ def generate_fpa_data(start_year: int = 2024, end_year: int = 2026):
         mes = int(m_row["Mes"])
         anomes = int(m_row["AnoMes"])
         
-        # Crescimento anual orçado (inflação/expansão de volume de safra)
-        year_multiplier = 1.0 + ((ano - start_year) * 0.05)
+        # Crescimento de safra/processamento anual
+        year_multiplier = 1.0 + ((ano - start_year) * 0.04)
         
         for acc_id, cc_list in account_cc_map.items():
             base_val = base_values[acc_id] * year_multiplier
             
-            # Aplicação da curva sazonal conforme a natureza da conta
             if acc_id.startswith("1."):
-                s_factor = seasonality_rev[mes]
-            elif acc_id.startswith("3.") or acc_id == "4.01.001":
+                s_factor = seasonality_export[mes]
+            elif acc_id.startswith("3.") or acc_id.startswith("4.01"):
                 s_factor = seasonality_cpv[mes]
             else:
                 s_factor = seasonality_flat[mes]
                 
             monthly_budget_total = base_val * s_factor
-            
-            # Divisão entre os centros de custo associados
             val_per_cc_budget = monthly_budget_total / len(cc_list)
             
             for cc_id in cc_list:
-                # 1. Registro do Orçamento Mensal
                 budget_records.append({
                     "AnoMes": anomes,
                     "Ano": ano,
@@ -220,24 +223,25 @@ def generate_fpa_data(start_year: int = 2024, end_year: int = 2026):
                     "Valor_Orcado": round(val_per_cc_budget, 2)
                 })
                 
-                # 2. Geração dos Lançamentos Reais Diários (Livro Razão / GL)
-                # Introdução de variância real controlada (+/- 12% aleatório com choques pontuais)
-                variance_factor = np.random.normal(1.02, 0.06) # Média levemente acima do orçado
+                # Variância real controlada
+                variance_factor = np.random.normal(1.015, 0.05)
                 
-                # Evento pontual realista: Em maio de 2025 houve quebra de secador, elevando manutenção em 35%
-                if ano == 2025 and mes == 5 and acc_id == "3.05.001":
-                    variance_factor = 1.38
-                # Evento pontual realista: Em setembro de 2024 pico de valorização cambial favorável
-                if ano == 2024 and mes == 9 and acc_id == "5.01.001":
-                    variance_factor = 1.45
+                # Eventos pontuais industriais realistas:
+                # 1. Junho de 2025: Geada pontual atrasou colheita, elevando custo de fretes e caldeiras
+                if ano == 2025 and mes == 6 and acc_id in ["3.03.001", "4.01.001"]:
+                    variance_factor = 1.28
+                # 2. Outubro de 2024: Pico favorável do Dólar alavancou receita de exportação
+                if ano == 2024 and mes == 10 and acc_id.startswith("1.01"):
+                    variance_factor = 1.18
+                # 3. Abril de 2025: Revisão preventiva nas linhas de debulha (Threshing)
+                if ano == 2025 and mes == 4 and acc_id == "3.05.001":
+                    variance_factor = 1.35
                     
                 monthly_real_total = val_per_cc_budget * variance_factor
                 
-                # Número de dias úteis no mês para pulverização dos lançamentos contábeis
                 _, num_days = calendar.monthrange(ano, mes)
-                num_entries = random.randint(4, 12) if not acc_id.startswith("3.06") else 1 # Depreciação é 1 lançamento
+                num_entries = random.randint(4, 12) if not acc_id.startswith("3.06") else 1
                 
-                # Distribuição do valor mensal em múltiplos lançamentos diários
                 daily_weights = np.random.dirichlet(np.ones(num_entries))
                 entry_days = sorted(random.sample(range(1, num_days + 1), num_entries))
                 
@@ -253,20 +257,17 @@ def generate_fpa_data(start_year: int = 2024, end_year: int = 2026):
                         "ID_Conta": acc_id,
                         "ID_CentroCusto": cc_id,
                         "Valor_Realizado": round(entry_val, 2),
-                        "Historico_Contabil": f"Lancamento Contabil - {acc_id} - Ref {mes:02d}/{ano}"
+                        "Historico_Contabil": f"Lancamento Razao - {acc_id} - Ref {mes:02d}/{ano} - Planta Venancio Aires"
                     })
 
     df_budget = pd.DataFrame(budget_records)
     df_real = pd.DataFrame(real_records)
     
-    logger.info(f"Fatos_Orcamento_Planejado gerada com {len(df_budget)} registros.")
-    logger.info(f"Fatos_Lancamentos_Realizados gerada com {len(df_real)} lançamentos diários.")
+    logger.info(f"Orçamento Mensal gerado: {len(df_budget)} linhas.")
+    logger.info(f"Lançamentos Reais Diários gerados: {len(df_real)} linhas.")
     
     return df_accounts, df_cc, df_cal, df_budget, df_real
 
 if __name__ == "__main__":
     df_acc, df_cc, df_cal, df_bgt, df_real = generate_fpa_data()
-    print("\nAmostra do Orçamento Mensal:")
-    print(df_bgt.head())
-    print("\nAmostra dos Lançamentos Reais Diários:")
-    print(df_real.head())
+    print("Alliance One Data Generator executado com sucesso.")

@@ -1,22 +1,24 @@
 ﻿ID_Conta;Nome_Conta;Nivel1;Nivel2;Natureza;Ordem_DRE
-1.01.001;Venda Tabaco Processado - Exportacao;1. Receita Bruta;Receita de Exportacao;Credito;1
-1.01.002;Venda Tabaco Processado - Mercado Interno;1. Receita Bruta;Receita Mercado Interno;Credito;2
-1.02.001;Venda de Subprodutos (Talas e Fumos Picados);1. Receita Bruta;Outras Receitas Operacionais;Credito;3
-2.01.001;Impostos sobre Faturamento (PIS, COFINS, ICMS);2. Deducoes da Receita;Impostos Incidentes;Debito;4
-2.02.001;Devolucoes e Abatimentos de Exportacao;2. Deducoes da Receita;Cancelamentos e Abatimentos;Debito;5
-3.01.001;Compra de Tabaco em Folha (Materia-Prima Safra);3. Custo Industrial (CPV);Materia-Prima Direta;Debito;6
-3.02.001;Mao de Obra Direta Industrial (Debulha e Cura);3. Custo Industrial (CPV);Mao de Obra Fabril;Debito;7
-3.03.001;Energia Eletrica Fabril e Vapor/Caldeiras;3. Custo Industrial (CPV);Utilidades Industriais;Debito;8
-3.04.001;Insumos de Embalagem (Caixas C-48 e Cintas);3. Custo Industrial (CPV);Embalagens e Insumos;Debito;9
-3.05.001;Manutencao Industrial Preditiva e Corretiva;3. Custo Industrial (CPV);Manutencao Fabril;Debito;10
-3.06.001;Depreciacao de Linhas de Debulha e Secadores;3. Custo Industrial (CPV);Depreciacao Industrial;Debito;11
-4.01.001;Fretes Internacionais e Terminal Portuario;4. Despesas Operacionais (OPEX);Logistica e Embarque;Debito;12
-4.02.001;Folha de Pagamento Administrativa e Gestao;4. Despesas Operacionais (OPEX);Despesas Corporativas;Debito;13
-4.03.001;Licencas de Software, TI e Infraestrutura;4. Despesas Operacionais (OPEX);Tecnologia da Informacao;Debito;14
-4.04.001;Laudos Agronomicos e Certificacoes Fitossanitarias;4. Despesas Operacionais (OPEX);Qualidade e Agronomia;Debito;15
-4.05.001;Viagens Comerciais e Prospeccao Global;4. Despesas Operacionais (OPEX);Comercial e Vendas;Debito;16
-4.06.001;Seguranca Patrimonial e Manutencao Predial;4. Despesas Operacionais (OPEX);Facilities e Ocupacao;Debito;17
-5.01.001;Variacao Cambial Liquida (Contratos de Exportacao);5. Resultado Financeiro;Efeito Cambial;Credito;18
-5.02.001;Despesas Financeiras e Juros de Capital de Giro;5. Resultado Financeiro;Despesas Bancarias;Debito;19
-5.03.001;Receitas de Aplicacoes Financeiras de Curto Prazo;5. Resultado Financeiro;Receitas Financeiras;Credito;20
-6.01.001;Provisao de IRPJ e CSLL;6. Provisao Tributaria;Impostos Diretos;Debito;21
+1.01.001;Exportacao Tabaco Processado - Strips Virginia;1. Receita Bruta;Receita de Exportacao;Credito;1
+1.01.002;Exportacao Tabaco Processado - Strips Burley;1. Receita Bruta;Receita de Exportacao;Credito;2
+1.01.003;Exportacao de By-Products (Stems/Talas e Fumos Picados);1. Receita Bruta;Receita de Exportacao;Credito;3
+1.02.001;Vendas no Mercado Interno e Amostras Comerciais;1. Receita Bruta;Receita Mercado Interno;Credito;4
+2.01.001;Tributos sobre Faturamento Interno (PIS/COFINS/ICMS);2. Deducoes da Receita;Impostos Incidentes;Debito;5
+2.02.001;Descontos Comerciais e Reclamacoes de Umidade/Qualidade;2. Deducoes da Receita;Cancelamentos e Abatimentos;Debito;6
+3.01.001;Aquisicao de Tabaco Cru (Produtores Integrados Sul);3. Custo Industrial (CPV);Materia-Prima Direta;Debito;7
+3.02.001;Mao de Obra Direta Fabril (Linhas Threshing e Prensas);3. Custo Industrial (CPV);Mao de Obra Fabril;Debito;8
+3.03.001;Utilidades Industriais (Caldeiras a Biomassa, Vapor e Energia);3. Custo Industrial (CPV);Utilidades Fabris;Debito;9
+3.04.001;Embalagens de Exportacao (Caixas C-48, Liners e Cintas);3. Custo Industrial (CPV);Embalagens e Insumos;Debito;10
+3.05.001;Manutencao Industrial Preditiva das Linhas de Debulha;3. Custo Industrial (CPV);Manutencao Fabril;Debito;11
+3.06.001;Depreciacao Fabril (Linhas Threshing, Redryers e Silos);3. Custo Industrial (CPV);Depreciacao Fabril;Debito;12
+4.01.001;Fretes Rodoviarios (Venancio Aires -> Porto de Rio Grande);4. Despesas Operacionais (OPEX);Logistica e Exportacao;Debito;13
+4.01.002;Custos Portuarios, Estufagem e Terminal Alfandegado;4. Despesas Operacionais (OPEX);Logistica e Exportacao;Debito;14
+4.02.001;Assistente Tecnico de Campo e Programa STP (Agronomia/ESG);4. Despesas Operacionais (OPEX);Agronomia e Sustentabilidade;Debito;15
+4.03.001;Folha de Pagamento Administrativa e Gestao Corporativa;4. Despesas Operacionais (OPEX);Despesas Corporativas;Debito;16
+4.04.001;Tecnologia da Informacao, ERP e Automacao Fabril;4. Despesas Operacionais (OPEX);Tecnologia da Informacao;Debito;17
+4.05.001;Laudos Fitossanitarios, Laboratorio de Fumo e Qualidade;4. Despesas Operacionais (OPEX);Qualidade e Laboratorio;Debito;18
+4.06.001;Mesa Comercial Internacional e Negociacao de Safras;4. Despesas Operacionais (OPEX);Comercial e Vendas;Debito;19
+5.01.001;Variacao Cambial Liquida (Contratos de Exportacao USD);5. Resultado Financeiro;Efeito Cambial;Credito;20
+5.02.001;Juros e Despesas com Antecipacao Cambial (ACC / ACE);5. Resultado Financeiro;Despesas Bancarias;Debito;21
+5.03.001;Rendimento de Aplicacoes Financeiras de Tesouraria;5. Resultado Financeiro;Receitas Financeiras;Credito;22
+6.01.001;Provisao de IRPJ e CSLL;6. Provisao Tributaria;Impostos Diretos;Debito;23

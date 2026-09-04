@@ -1,8 +1,8 @@
-# Pipeline de FP&A & Controladoria Industrial (Beneficiamento de Tabaco)
+# Pipeline de FP&A & Controladoria Industrial (Alliance One - Polo Venâncio Aires)
 
-Pipeline *End-to-End* de Engenharia de Dados, Data Warehousing e Planejamento e Controle Financeiro (FP&A - Orçado vs. Realizado) desenvolvido para uma indústria de médio porte do setor de processamento e beneficiamento de tabaco.
+Pipeline *End-to-End* de Engenharia de Dados, Data Warehousing e Planejamento e Controle Financeiro (FP&A - Orçado vs. Realizado) modelado sobre a realidade operacional e industrial da **Alliance One Brasil Exportadora de Tabacos Ltda.** (Sede e Polo Fabril em Venâncio Aires - RS).
 
-O projeto resolve o desafio de consolidação contábil gerencial entre fontes de dados com diferentes granularidades: o **Orçamento Anual/Mensal** (aprovado por centro de custo e conta) e os **Lançamentos Contábeis Reais** (granularidade diária de Livro Razão / *General Ledger*), aplicando regras de rateio de despesas indiretas corporativas e disponibilizando consultas analíticas de auditoria e DRE Gerencial.
+A companhia atua no modelo *Leaf Merchant* (processamento, beneficiamento e exportação global de tabaco em folha crua e desengaçada, sem produção de cigarros acabados), destinando mais de **95% de sua produção ao mercado internacional** via embarques marítimos no Porto de Rio Grande (RS).
 
 ---
 
@@ -10,30 +10,30 @@ O projeto resolve o desafio de consolidação contábil gerencial entre fontes d
 
 ```mermaid
 flowchart TD
-    subgraph Ingestao ["1. Camada de Ingestao (Bronze)"]
-        A1["ERP Industrial (Livro Razao / GL Diario)"]
-        A2["Planejamento Orcamentario (Planilhas / FP&A Mensal)"]
+    subgraph Ingestao ["1. Ingestao de Dados (Bronze)"]
+        A1["ERP Industrial & GL Diario (Planta Venancio Aires)"]
+        A2["Planejamento Orcamentario (FPA Mensal / Safra)"]
     end
 
-    subgraph Processamento ["2. Engenharia & Data Quality (Silver)"]
+    subgraph Processamento ["2. Engenharia, Rateio & DataOps (Silver)"]
         B1["ETL Python (Sanitizacao & Tipagem)"]
-        B2["Motor de Rateio de Despesas Indiretas"]
-        B3["Suite de Testes de Data Quality"]
+        B2["Motor de Rateio de Custos Corporativos Indiretos"]
+        B3["Suite de Testes de Data Quality (100% Validado)"]
         B4["Esteira de Logs em /logs"]
     end
 
     subgraph Armazenamento ["3. Data Warehouse Relacional (Gold)"]
         C1[("SQLite DW: fpa_industrial_dw.db")]
-        C2["Dim_PlanoContas (Hierarquia DRE)"]
-        C3["Dim_CentroCusto (Fabril & Corporativo)"]
-        C4["Dim_Calendario (Safra & Fiscal)"]
+        C2["Dim_PlanoContas (Hierarquia DRE Alliance One)"]
+        C3["Dim_CentroCusto (Fabrica Venancio Aires, Campo & Sede)"]
+        C4["Dim_Calendario (Safras 2024-2026)"]
         C5["Fatos_Orcamento_Planejado"]
         C6["Fatos_Lancamentos_Realizados"]
     end
 
-    subgraph Consumo ["4. Camada Semantica & Analytics (BI)"]
-        D1["Consultas SQL Avancadas (Window Functions & YTD)"]
-        D2["Modelo Semantico Power BI (Matriz DRE & Waterfall)"]
+    subgraph Consumo ["4. Analytics & Camada Semantica (BI)"]
+        D1["Consultas SQL Avancadas (Window Functions & Variancia)"]
+        D2["Modelo Semantico Power BI (Matriz DRE & Waterfall EBITDA)"]
     end
 
     A1 --> B1
@@ -53,31 +53,29 @@ flowchart TD
 
 ```text
 pipeline-fpa-controladoria-industrial/
-├── .env.example                     <- Variaveis de ambiente e configuracao
-├── README.md                        <- Visao executiva e arquitetura
-├── DOCUMENTACAO.md                  <- Dicionario de dados, regras de rateio e linhagem
+├── .env.example                     <- Variaveis de ambiente e configuracoes de execucao
+├── README.md                        <- Visao executiva e arquitetura da solucao
+├── DOCUMENTACAO.md                  <- Dicionario de dados, centros de custo e regras contabeis
 ├── logs/
-│   └── pipeline_fpa.log             <- Logs estruturados de auditoria e carga
-├── src/                             <- Codigo-fonte do pipeline de dados
-│   ├── config.py                    <- Parametros de ambiente e configurador de logs
-│   ├── generator.py                 <- Gerador de base sintetica com sazonalidade de safra
-│   ├── etl_pipeline.py              <- Extracao, transformacao, rateio e carga no DW
-│   └── data_quality.py              <- Suite de testes automatizados de qualidade
-├── sql/                             <- Scripts SQL do Data Warehouse
+│   └── pipeline_fpa.log             <- Logs estruturados de carga e auditoria
+├── src/                             <- Engenharia de dados e esteira de transformacao
+│   ├── config.py                    <- Parametros de ambiente e logger unificado
+│   ├── generator.py                 <- Gerador de base sintetica com perfil Alliance One
+│   ├── etl_pipeline.py              <- Pipeline ETL, rateio de custos corporativos e carga no DW
+│   └── data_quality.py              <- Suite de testes automatizados de qualidade de dados
+├── sql/                             <- Consultas e Scripts do Data Warehouse
 │   ├── 01_ddl_star_schema.sql       <- DDL do modelo dimensional
-│   ├── 02_analytical_queries.sql    <- Queries analiticas (YTD, YoY, Variance Analysis)
-│   └── 03_data_quality_audit.sql    <- Consultas de auditoria e conciliacao
-├── data/                            <- Banco de dados e datasets exportados
+│   ├── 02_analytical_queries.sql    <- Queries analiticas (YTD, YoY, Ranking de Ofensores)
+│   └── 03_data_quality_audit.sql    <- Consultas de auditoria e conciliacao contabil
+├── data/                            <- Banco de dados relacional e saidas em CSV
 │   └── fpa_industrial_dw.db         <- Data Warehouse SQLite relacional
-└── bi/                              <- Camada Semantica e Relatorio
+└── bi/                              <- Camada Semantica Power BI
     └── measures.dax                 <- Catalogo de medidas DAX em Display Folders
 ```
 
 ---
 
 ## Modelo Dimensional (Star Schema)
-
-O Data Warehouse adota a modelagem dimensional de Ralph Kimball para garantir integridade e velocidade analítica:
 
 ```mermaid
 erDiagram
@@ -136,48 +134,33 @@ erDiagram
 
 ---
 
-## Destaques de Engenharia e Regras de Negócio
+## Particularidades do Modelo de Negócio (Alliance One)
 
-### 1. Tratamento de Sazonalidade Industrial
-A indústria de beneficiamento de tabaco possui forte concentração de safra entre os meses de **Março e Julho** (compra de matéria-prima, recepção, debulha e cura contínua) e concentração de faturamento e embarque portuário entre **Maio e Novembro**. O pipeline reflete essa curva operacional no orçamento e nas transações reais.
+### 1. Dinâmica de Faturamento (Exportação > 95%)
+O faturamento é composto por contratos internacionais de exportação de:
+- **Strips Virgínia** (Lâminas desengaçadas de tabaco Virgínia)
+- **Strips Burley** (Lâminas de tabaco Burley)
+- **By-Products** (Talas / *Stems* e fumos picados)
+- Imunidade tributária constitucional sobre receitas de exportação (ausência de incidência de ICMS/PIS/COFINS no faturamento externo).
 
-### 2. Rateio Contábil de Despesas Corporativas
-O módulo `src/etl_pipeline.py` aplica a absorção de 60% das despesas corporativas indiretas de TI e Recursos Humanos sobre os quatro centros de custo produtivos fabris (`CC1001` a `CC1004`), gerando lançamentos contábeis rastreáveis de rateio gerencial.
+### 2. Sazonalidade de Processamento & Fretes (Porto de Rio Grande)
+- **Safra e Processamento Fabril (Março a Julho):** Pico de compra de tabaco cru dos produtores rurais integrados dos 3 estados do Sul (RS, SC, PR) e operação contínua das linhas de debulha mecânica (*Threshing*) e secadores contínuos (*Redryers*).
+- **Embarques e Logística (Maio a Novembro):** Concentração do transporte rodoviário de caixas C-48 (200 kg) de Venâncio Aires até o Porto de Rio Grande (RS) e estufagem de contêineres marítimos.
 
-### 3. DataOps & Qualidade de Dados
-O pipeline executa testes automatizados com bloqueio de inconsistências:
-- **Ausência de Chaves Nulas**: Validação de todas as PKs e FKs.
-- **Integridade Referencial**: Detecção de lançamentos em centros de custo ou contas inexistentes.
-- **Validação Temporal**: Bloqueio de datas fora da janela fiscal de análise.
-- **Rastreabilidade**: Todas as etapas gravam status e volumetria em `logs/pipeline_fpa.log`.
+### 3. Rateio Contábil de Despesas da Sede
+Absorção contábil de 60% dos custos corporativos indiretos de TI e Gestão da Sede entre os quatro centros de custo fabris produtivos de Venâncio Aires (`CC1001` a `CC1004`).
 
 ---
 
 ## Como Executar o Projeto
 
-### Pré-requisitos
-- Python 3.9+ instalado
-- Pacotes listados: `pandas`, `numpy`
+```bash
+# 1. Executar o pipeline ETL e carga no Data Warehouse
+python src/etl_pipeline.py
 
-### Passo a Passo
-
-1. **Clonar o Repositório e Configurar o Ambiente:**
-   ```bash
-   cp .env.example .env
-   ```
-
-2. **Executar o Pipeline de Engenharia (ETL & Carga DW):**
-   ```bash
-   python src/etl_pipeline.py
-   ```
-
-3. **Executar a Suíte de Auditoria e Qualidade de Dados:**
-   ```bash
-   python src/data_quality.py
-   ```
-
-4. **Consultar as Análises em SQL:**
-   - Execute os scripts contidos em `sql/02_analytical_queries.sql` conectando qualquer cliente SQL ao arquivo `data/fpa_industrial_dw.db`.
+# 2. Executar a suíte de auditoria e qualidade de dados
+python src/data_quality.py
+```
 
 ---
 

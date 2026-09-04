@@ -1,6 +1,7 @@
 // ==============================================================================
 // CATÁLOGO DE MEDIDAS DAX - PROJETO FP&A & CONTROLADORIA INDUSTRIAL
-// Setor: Beneficiamento e Processamento de Tabaco
+// Empresa de Referência: Alliance One Brasil (Polo Venâncio Aires - RS)
+// Modelo de Negócio: Leaf Merchant (Processamento e Exportação de Tabaco em Folha)
 // ==============================================================================
 
 // ------------------------------------------------------------------------------
@@ -70,33 +71,40 @@ DIVIDE(
 // PASTA DE EXIBIÇÃO: 03. Demonstrativo de Resultados (DRE Gerencial)
 // ------------------------------------------------------------------------------
 
+[Receita Bruta Exportacao Real] = 
+// Receita bruta obtida com a exportação de Strips Virgínia, Burley e By-products
+CALCULATE(
+    [Realizado Total],
+    Dim_PlanoContas[Nivel2] = "Receita de Exportacao"
+)
+
 [Receita Bruta Real] = 
-// Soma das receitas brutas de exportação, mercado interno e subprodutos
+// Soma das receitas brutas totais (Exportação 95%+ e Mercado Interno)
 CALCULATE(
     [Realizado Total],
     Dim_PlanoContas[Nivel1] = "1. Receita Bruta"
 )
 
 [Deducoes Real] = 
-// Soma dos impostos e abatimentos incidentes sobre o faturamento
+// Soma dos impostos incidentes sobre mercado interno e abatimentos/reclamações
 CALCULATE(
     [Realizado Total],
     Dim_PlanoContas[Nivel1] = "2. Deducoes da Receita"
 )
 
 [Receita Liquida Real] = 
-// Receita Operacional Líquida (Receita Bruta deduzida dos tributos)
+// Receita Operacional Líquida (Receita Bruta deduzida das deduções)
 [Receita Bruta Real] - [Deducoes Real]
 
 [CPV Industrial Real] = 
-// Custo total dos produtos vendidos (matéria-prima, mão de obra, utilidades fabris)
+// Custo de compra da matéria-prima de produtores integrados e conversão fabril
 CALCULATE(
     [Realizado Total],
     Dim_PlanoContas[Nivel1] = "3. Custo Industrial (CPV)"
 )
 
 [Margem Bruta Real] = 
-// Lucro Bruto Industrial após absorção dos custos fabris
+// Lucro Bruto Industrial após processamento nas linhas de Threshing e Prensas
 [Receita Liquida Real] - [CPV Industrial Real]
 
 [Margem Bruta %] = 
@@ -107,8 +115,8 @@ DIVIDE(
     0
 )
 
-[OPEX Real] = 
-// Despesas operacionais (logística de exportação, administrativo, TI, agronomia)
+[OPEX & Logistica Real] = 
+// Despesas operacionais, frete até Porto de Rio Grande, terminal e agronomia (STP)
 CALCULATE(
     [Realizado Total],
     Dim_PlanoContas[Nivel1] = "4. Despesas Operacionais (OPEX)"
@@ -122,7 +130,7 @@ VAR _Depreciacao =
         Dim_PlanoContas[ID_Conta] = "3.06.001"
     )
 RETURN
-    ([Margem Bruta Real] - [OPEX Real]) + _Depreciacao
+    ([Margem Bruta Real] - [OPEX & Logistica Real]) + _Depreciacao
 
 [Margem EBITDA %] = 
 // Percentual de margem EBITDA sobre a Receita Líquida
@@ -132,8 +140,8 @@ DIVIDE(
     0
 )
 
-[Resultado Financeiro Real] = 
-// Efeito financeiro líquido (Variação Cambial + Aplicações - Juros de Dívida)
+[Resultado Financeiro & Hedge Real] = 
+// Efeito líquido da variação cambial em USD, rendimentos e custos de ACC/ACE
 VAR _ReceitasFin = 
     CALCULATE(
         [Realizado Total],
@@ -153,7 +161,7 @@ RETURN
 // ------------------------------------------------------------------------------
 
 [Cor Status Variancia EBITDA] = 
-// Retorna cor hexadecimal para formatação condicional (#009E49 Favorável / #E74C3C Desfavorável)
+// Retorna cor hexadecimal (#009E49 Favorável / #E74C3C Desfavorável)
 IF(
     [EBITDA Gerencial Real] >= [Orcado Total],
     "#009E49",
@@ -161,8 +169,7 @@ IF(
 )
 
 [DRE Valor Customizado] = 
-// Medida comutada para exibição hierárquica em matriz contábil respeitando o sinal das contas
-VAR _Ordem = SELECTEDVALUE(Dim_PlanoContas[Ordem_DRE])
+// Medida comutada para exibição correta de sinais na matriz contábil da DRE
 VAR _Natureza = SELECTEDVALUE(Dim_PlanoContas[Natureza])
 VAR _Valor = [Realizado Total]
 RETURN

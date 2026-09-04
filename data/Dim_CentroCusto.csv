@@ -1,11 +1,11 @@
 ﻿ID_CentroCusto;Nome_CentroCusto;Tipo_Unidade;Area_Negocio
-CC1001;Recepcao e Classificacao de Folhas;Fabrica;Operacoes Fabris
-CC1002;Linha de Debulha e Separacao (Threshing);Fabrica;Operacoes Fabris
-CC1003;Secadores Continuos e Redryer;Fabrica;Operacoes Fabris
-CC1004;Prensagem, Embalagem e Armazens C-48;Fabrica;Operacoes Fabris
-CC1005;Manutencao Industrial e Caldeiras;Fabrica;Suporte Fabril
-CC2001;Logistica, Fretes e Embarque Portuario;Operacional;Logistica
-CC3001;Diretoria Executiva e Controladoria;Matriz Corporativa;Corporativo
-CC3002;Tecnologia da Informacao e Seguranca;Matriz Corporativa;Suporte Corporativo
-CC3003;Recursos Humanos e Saude Ocupacional;Matriz Corporativa;Suporte Corporativo
-CC4001;Mesa de Trading e Vendas Globais;Comercial;Comercial
+CC1001;Recepcao, Pesagem e Classificacao de Fumo Cru;Fabrica Venancio Aires;Operacoes Fabris
+CC1002;Linha de Debulha Mecanica (Threshing Lines);Fabrica Venancio Aires;Operacoes Fabris
+CC1003;Secadores Continuos e Redryers (Controle Umidade);Fabrica Venancio Aires;Operacoes Fabris
+CC1004;Prensagem, Embalagem Caixas C-48 e Silos;Fabrica Venancio Aires;Operacoes Fabris
+CC1005;Manutencao Industrial, Vapor e Caldeiras Biomassa;Fabrica Venancio Aires;Suporte Fabril
+CC2001;Logistica de Conteineres e Terminal Porto Rio Grande;Operacional;Logistica Exportacao
+CC2002;Orientacao Tecnica Agronomica e Programa STP (Campo);Operacional;Agronomia e Campo
+CC3001;Sede Venancio Aires - Diretoria, FP&A e Controladoria;Sede Administrativa;Corporativo
+CC3002;TI Corporativa, Automacao Fabril e Seguranca;Sede Administrativa;Suporte Corporativo
+CC4001;Mesa de Trading Global e Atendimento a Clientes;Comercial;Comercial Internacional

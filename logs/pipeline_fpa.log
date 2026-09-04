@@ -36,3 +36,77 @@
 2026-09-04 14:33:21 [INFO] (data_quality) ================================================================================
 2026-09-04 14:33:21 [INFO] (data_quality) AUDITORIA CONCLUÍDA. RESULTADO GERAL: 100% APROVADO
 2026-09-04 14:33:21 [INFO] (data_quality) ================================================================================
+2026-09-04 14:36:20 [INFO] (etl_pipeline) ================================================================================
+2026-09-04 14:36:20 [INFO] (etl_pipeline) INICIANDO EXECUÇÃO DO PIPELINE DE ENGENHARIA DE DADOS - FP&A INDUSTRIAL
+2026-09-04 14:36:20 [INFO] (etl_pipeline) ================================================================================
+2026-09-04 14:36:20 [INFO] (generator) Gerando Fatos de Orçado e Realizado para Alliance One (Venâncio Aires)...
+2026-09-04 14:36:20 [INFO] (generator) Gerando Plano de Contas Gerencial - Alliance One (Venâncio Aires)...
+2026-09-04 14:36:20 [INFO] (generator) Dim_PlanoContas gerada com 23 contas estruturadas.
+2026-09-04 14:36:20 [INFO] (generator) Gerando Centros de Custo - Planta Venâncio Aires...
+2026-09-04 14:36:20 [INFO] (generator) Dim_CentroCusto gerada com 10 centros de custo.
+2026-09-04 14:36:20 [INFO] (generator) Gerando Calendário Fiscal e de Safras (2024 a 2026)...
+2026-09-04 14:36:21 [INFO] (generator) Orçamento Mensal gerado: 1008 linhas.
+2026-09-04 14:36:21 [INFO] (generator) Lançamentos Reais Diários gerados: 7437 linhas.
+2026-09-04 14:36:21 [INFO] (etl_pipeline) Aplicando regra de rateio de despesas corporativas para a operação fabril...
+2026-09-04 14:36:21 [INFO] (etl_pipeline) Gerados 0 lançamentos contábeis de rateio de despesas indiretas.
+2026-09-04 14:36:21 [INFO] (etl_pipeline) Criando esquema relacional (Star Schema) no Data Warehouse SQLite...
+2026-09-04 14:36:21 [INFO] (etl_pipeline) Esquema DDL e índices criados com sucesso no banco de dados.
+2026-09-04 14:36:21 [INFO] (etl_pipeline) Populando tabelas relacionais do Data Warehouse...
+2026-09-04 14:36:21 [INFO] (etl_pipeline) Carga relacional no SQLite concluída com sucesso.
+2026-09-04 14:36:21 [INFO] (etl_pipeline) Exportando datasets formatados em CSV para consumo no Power BI...
+2026-09-04 14:36:21 [INFO] (etl_pipeline) ================================================================================
+2026-09-04 14:36:21 [INFO] (etl_pipeline) PIPELINE EXECUTADO COM SUCESSO EM 0.33 SEGUNDOS.
+2026-09-04 14:36:21 [INFO] (etl_pipeline) Total de Contas: 23 | Centros de Custo: 10
+2026-09-04 14:36:21 [INFO] (etl_pipeline) Total de Orçamentos Mensais: 1008 | Lançamentos Reais: 7437
+2026-09-04 14:36:21 [INFO] (etl_pipeline) ================================================================================
+2026-09-04 14:36:21 [INFO] (data_quality) ================================================================================
+2026-09-04 14:36:21 [INFO] (data_quality) INICIANDO SUÍTE DE TESTES DE DATA QUALITY & AUDITORIA CONTÁBIL
+2026-09-04 14:36:21 [INFO] (data_quality) ================================================================================
+2026-09-04 14:36:22 [INFO] (data_quality) TESTE 'Fatos_Lancamentos_Realizados - Nulos em Chaves': APROVADO [PASS] - Registros com chave nula encontrados: 0
+2026-09-04 14:36:22 [INFO] (data_quality) TESTE 'Fatos_Orcamento_Planejado - Nulos em Chaves': APROVADO [PASS] - Registros com chave nula encontrados: 0
+2026-09-04 14:36:22 [INFO] (data_quality) TESTE 'Integridade Referencial - Contas Contábeis (Realizado)': APROVADO [PASS] - Chaves órfãs identificadas: 0
+2026-09-04 14:36:22 [INFO] (data_quality) TESTE 'Integridade Referencial - Centros de Custo (Realizado)': APROVADO [PASS] - Chaves órfãs identificadas: 0
+2026-09-04 14:36:22 [INFO] (data_quality) TESTE 'Integridade Referencial - Contas Contábeis (Orçamento)': APROVADO [PASS] - Chaves órfãs identificadas: 0
+2026-09-04 14:36:22 [INFO] (data_quality) TESTE 'Integridade Referencial - Centros de Custo (Orçamento)': APROVADO [PASS] - Chaves órfãs identificadas: 0
+2026-09-04 14:36:22 [INFO] (data_quality) TESTE 'Consistência de Valores Positivos (Realizado)': APROVADO [PASS] - Lançamentos com valor zero ou negativo: 0
+2026-09-04 14:36:22 [INFO] (data_quality) TESTE 'Limites Temporais do Calendário': APROVADO [PASS] - Intervalo observado: 2024-01-01 a 2026-12-31
+2026-09-04 14:36:22 [INFO] (data_quality) ================================================================================
+2026-09-04 14:36:22 [INFO] (data_quality) AUDITORIA CONCLUÍDA. RESULTADO GERAL: 100% APROVADO
+2026-09-04 14:36:22 [INFO] (data_quality) ================================================================================
+2026-09-04 14:36:35 [INFO] (etl_pipeline) ================================================================================
+2026-09-04 14:36:35 [INFO] (etl_pipeline) INICIANDO EXECUÇÃO DO PIPELINE DE ENGENHARIA DE DADOS - ALLIANCE ONE FP&A
+2026-09-04 14:36:35 [INFO] (etl_pipeline) ================================================================================
+2026-09-04 14:36:35 [INFO] (generator) Gerando Fatos de Orçado e Realizado para Alliance One (Venâncio Aires)...
+2026-09-04 14:36:35 [INFO] (generator) Gerando Plano de Contas Gerencial - Alliance One (Venâncio Aires)...
+2026-09-04 14:36:35 [INFO] (generator) Dim_PlanoContas gerada com 23 contas estruturadas.
+2026-09-04 14:36:35 [INFO] (generator) Gerando Centros de Custo - Planta Venâncio Aires...
+2026-09-04 14:36:35 [INFO] (generator) Dim_CentroCusto gerada com 10 centros de custo.
+2026-09-04 14:36:35 [INFO] (generator) Gerando Calendário Fiscal e de Safras (2024 a 2026)...
+2026-09-04 14:36:36 [INFO] (generator) Orçamento Mensal gerado: 1008 linhas.
+2026-09-04 14:36:36 [INFO] (generator) Lançamentos Reais Diários gerados: 7437 linhas.
+2026-09-04 14:36:36 [INFO] (etl_pipeline) Aplicando regra de rateio de despesas corporativas para a operação fabril de Venâncio Aires...
+2026-09-04 14:36:36 [INFO] (etl_pipeline) Gerados 2324 lançamentos contábeis de rateio de despesas indiretas.
+2026-09-04 14:36:36 [INFO] (etl_pipeline) Criando esquema relacional (Star Schema) no Data Warehouse SQLite...
+2026-09-04 14:36:36 [INFO] (etl_pipeline) Esquema DDL e índices criados com sucesso no banco de dados.
+2026-09-04 14:36:36 [INFO] (etl_pipeline) Populando tabelas relacionais do Data Warehouse...
+2026-09-04 14:36:36 [INFO] (etl_pipeline) Carga relacional no SQLite concluída com sucesso.
+2026-09-04 14:36:36 [INFO] (etl_pipeline) Exportando datasets formatados em CSV para consumo no Power BI...
+2026-09-04 14:36:36 [INFO] (etl_pipeline) ================================================================================
+2026-09-04 14:36:36 [INFO] (etl_pipeline) PIPELINE EXECUTADO COM SUCESSO EM 0.43 SEGUNDOS.
+2026-09-04 14:36:36 [INFO] (etl_pipeline) Total de Contas: 23 | Centros de Custo: 10
+2026-09-04 14:36:36 [INFO] (etl_pipeline) Total de Orçamentos Mensais: 1008 | Lançamentos Reais: 9761
+2026-09-04 14:36:36 [INFO] (etl_pipeline) ================================================================================
+2026-09-04 14:36:37 [INFO] (data_quality) ================================================================================
+2026-09-04 14:36:37 [INFO] (data_quality) INICIANDO SUÍTE DE TESTES DE DATA QUALITY & AUDITORIA CONTÁBIL
+2026-09-04 14:36:37 [INFO] (data_quality) ================================================================================
+2026-09-04 14:36:37 [INFO] (data_quality) TESTE 'Fatos_Lancamentos_Realizados - Nulos em Chaves': APROVADO [PASS] - Registros com chave nula encontrados: 0
+2026-09-04 14:36:37 [INFO] (data_quality) TESTE 'Fatos_Orcamento_Planejado - Nulos em Chaves': APROVADO [PASS] - Registros com chave nula encontrados: 0
+2026-09-04 14:36:37 [INFO] (data_quality) TESTE 'Integridade Referencial - Contas Contábeis (Realizado)': APROVADO [PASS] - Chaves órfãs identificadas: 0
+2026-09-04 14:36:37 [INFO] (data_quality) TESTE 'Integridade Referencial - Centros de Custo (Realizado)': APROVADO [PASS] - Chaves órfãs identificadas: 0
+2026-09-04 14:36:37 [INFO] (data_quality) TESTE 'Integridade Referencial - Contas Contábeis (Orçamento)': APROVADO [PASS] - Chaves órfãs identificadas: 0
+2026-09-04 14:36:37 [INFO] (data_quality) TESTE 'Integridade Referencial - Centros de Custo (Orçamento)': APROVADO [PASS] - Chaves órfãs identificadas: 0
+2026-09-04 14:36:37 [INFO] (data_quality) TESTE 'Consistência de Valores Positivos (Realizado)': APROVADO [PASS] - Lançamentos com valor zero ou negativo: 0
+2026-09-04 14:36:37 [INFO] (data_quality) TESTE 'Limites Temporais do Calendário': APROVADO [PASS] - Intervalo observado: 2024-01-01 a 2026-12-31
+2026-09-04 14:36:37 [INFO] (data_quality) ================================================================================
+2026-09-04 14:36:37 [INFO] (data_quality) AUDITORIA CONCLUÍDA. RESULTADO GERAL: 100% APROVADO
+2026-09-04 14:36:37 [INFO] (data_quality) ================================================================================
