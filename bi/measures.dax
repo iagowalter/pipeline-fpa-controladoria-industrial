@@ -30,11 +30,47 @@ TOTALYTD(
     Dim_Calendario[Data]
 )
 
-[Realizado Ano Anterior (SPLY)] = 
+[Realizado SPLY] = 
 // Calcula o valor realizado no mesmo período do ano anterior para análise YoY
 CALCULATE(
     [Realizado Total],
     SAMEPERIODLASTYEAR(Dim_Calendario[Data])
+)
+
+[Receita Bruta Orcada] = 
+// Receita bruta operacional orçada
+CALCULATE(
+    [Orcado Total],
+    Dim_PlanoContas[Nivel1] = "1. Receita Bruta"
+)
+
+[Receita Liquida Orcada] = 
+// Receita operacional líquida orçada
+[Receita Bruta Orcada] - CALCULATE([Orcado Total], Dim_PlanoContas[Nivel1] = "2. Deducoes da Receita")
+
+[CPV Industrial Orcado] = 
+// CPV industrial orçado
+CALCULATE(
+    [Orcado Total],
+    Dim_PlanoContas[Nivel1] = "3. Custo Industrial (CPV)"
+)
+
+[Margem Bruta Orcada] = 
+// Lucro bruto industrial orçado
+[Receita Liquida Orcada] - [CPV Industrial Orcado]
+
+[OPEX & Logistica Orcado] = 
+// Despesas operacionais e fretes orçados
+CALCULATE(
+    [Orcado Total],
+    Dim_PlanoContas[Nivel1] = "4. Despesas Operacionais (OPEX)"
+)
+
+[EBITDA Gerencial Orcado] = 
+// EBITDA gerencial orçado
+CALCULATE(
+    [Orcado Total],
+    Dim_PlanoContas[Nivel1] IN {"1. Receita Bruta", "2. Deducoes da Receita", "3. Custo Industrial (CPV)", "4. Despesas Operacionais (OPEX)"}
 )
 
 
@@ -66,49 +102,65 @@ DIVIDE(
     0
 )
 
+[Variacao YoY %] = 
+// Variação percentual frente ao mesmo período do ano anterior
+DIVIDE(
+    [Realizado Total] - [Realizado SPLY],
+    [Realizado SPLY],
+    0
+)
+
+[Desvio Receita Liquida %] = 
+DIVIDE([Receita Liquida Real] - [Receita Liquida Orcada], [Receita Liquida Orcada], 0)
+
+[Desvio Receita Bruta %] = 
+DIVIDE([Receita Bruta Real] - [Receita Bruta Orcada], [Receita Bruta Orcada], 0)
+
+[Desvio CPV Industrial %] = 
+DIVIDE([CPV Industrial Real] - [CPV Industrial Orcado], [CPV Industrial Orcado], 0)
+
+[Desvio OPEX %] = 
+DIVIDE([OPEX & Logistica Real] - [OPEX & Logistica Orcado], [OPEX & Logistica Orcado], 0)
+
+[Desvio EBITDA Gerencial %] = 
+DIVIDE([EBITDA Gerencial Real] - [EBITDA Gerencial Orcado], ABS([EBITDA Gerencial Orcado]), 0)
+
 
 // ------------------------------------------------------------------------------
 // PASTA DE EXIBIÇÃO: 03. Demonstrativo de Resultados (DRE Gerencial)
 // ------------------------------------------------------------------------------
 
 [Receita Bruta Exportacao Real] = 
-// Receita bruta obtida com a exportação de Strips Virgínia, Burley e By-products
 CALCULATE(
     [Realizado Total],
     Dim_PlanoContas[Nivel2] = "Receita de Exportacao"
 )
 
 [Receita Bruta Real] = 
-// Soma das receitas brutas totais (Exportação 95%+ e Mercado Interno)
 CALCULATE(
     [Realizado Total],
     Dim_PlanoContas[Nivel1] = "1. Receita Bruta"
 )
 
 [Deducoes Real] = 
-// Soma dos impostos incidentes sobre mercado interno e abatimentos/reclamações
 CALCULATE(
     [Realizado Total],
     Dim_PlanoContas[Nivel1] = "2. Deducoes da Receita"
 )
 
 [Receita Liquida Real] = 
-// Receita Operacional Líquida (Receita Bruta deduzida das deduções)
 [Receita Bruta Real] - [Deducoes Real]
 
 [CPV Industrial Real] = 
-// Custo de compra da matéria-prima de produtores integrados e conversão fabril
 CALCULATE(
     [Realizado Total],
     Dim_PlanoContas[Nivel1] = "3. Custo Industrial (CPV)"
 )
 
 [Margem Bruta Real] = 
-// Lucro Bruto Industrial após processamento nas linhas de Threshing e Prensas
 [Receita Liquida Real] - [CPV Industrial Real]
 
 [Margem Bruta %] = 
-// Percentual de Margem Bruta sobre a Receita Líquida
 DIVIDE(
     [Margem Bruta Real],
     [Receita Liquida Real],
@@ -116,14 +168,12 @@ DIVIDE(
 )
 
 [OPEX & Logistica Real] = 
-// Despesas operacionais, frete até Porto de Rio Grande, terminal e agronomia (STP)
 CALCULATE(
     [Realizado Total],
     Dim_PlanoContas[Nivel1] = "4. Despesas Operacionais (OPEX)"
 )
 
 [EBITDA Gerencial Real] = 
-// Lucro Antes de Juros, Impostos, Depreciação e Amortização
 VAR _Depreciacao = 
     CALCULATE(
         [Realizado Total],
@@ -133,48 +183,274 @@ RETURN
     ([Margem Bruta Real] - [OPEX & Logistica Real]) + _Depreciacao
 
 [Margem EBITDA %] = 
-// Percentual de margem EBITDA sobre a Receita Líquida
 DIVIDE(
     [EBITDA Gerencial Real],
     [Receita Liquida Real],
     0
 )
 
-[Resultado Financeiro & Hedge Real] = 
-// Efeito líquido da variação cambial em USD, rendimentos e custos de ACC/ACE
-VAR _ReceitasFin = 
-    CALCULATE(
-        [Realizado Total],
-        Dim_PlanoContas[ID_Conta] IN {"5.01.001", "5.03.001"}
-    )
-VAR _DespesasFin = 
-    CALCULATE(
-        [Realizado Total],
-        Dim_PlanoContas[ID_Conta] = "5.02.001"
-    )
-RETURN
-    _ReceitasFin - _DespesasFin
-
-
-// ------------------------------------------------------------------------------
-// PASTA DE EXIBIÇÃO: 04. Auxiliares & Formatacao
-// ------------------------------------------------------------------------------
-
-[Cor Status Variancia EBITDA] = 
-// Retorna cor hexadecimal (#009E49 Favorável / #E74C3C Desfavorável)
-IF(
-    [EBITDA Gerencial Real] >= [Orcado Total],
-    "#009E49",
-    "#E74C3C"
+[Resultado Financeiro Real] = 
+CALCULATE(
+    [Realizado Total],
+    Dim_PlanoContas[Nivel1] = "5. Resultado Financeiro"
 )
 
-[DRE Valor Customizado] = 
-// Medida comutada para exibição correta de sinais na matriz contábil da DRE
-VAR _Natureza = SELECTEDVALUE(Dim_PlanoContas[Natureza])
-VAR _Valor = [Realizado Total]
+
+// ------------------------------------------------------------------------------
+// PASTA DE EXIBIÇÃO: 04. Auxiliares & Formatacao (Cards & DRE)
+// ------------------------------------------------------------------------------
+
+[Detalhe Receita Liquida Desvio %] = 
+VAR _D = [Desvio Receita Liquida %]
 RETURN
     IF(
-        _Natureza = "Debito",
-        -_Valor,
-        _Valor
+        ISBLANK(_D),
+        BLANK(),
+        IF(
+            _D >= 0,
+            "▲ +" & FORMAT(_D, "0.0%"),
+            "▼ " & FORMAT(_D, "0.0%")
+        )
     )
+
+[Cor Detalhe Receita Liquida] = 
+IF([Desvio Receita Liquida %] >= 0, "#009E49", "#E74C3C")
+
+[Detalhe Receita Bruta Desvio %] = 
+VAR _D = [Desvio Receita Bruta %]
+RETURN
+    IF(
+        ISBLANK(_D),
+        BLANK(),
+        IF(
+            _D >= 0,
+            "▲ +" & FORMAT(_D, "0.0%"),
+            "▼ " & FORMAT(_D, "0.0%")
+        )
+    )
+
+[Cor Detalhe Receita Bruta] = 
+IF([Desvio Receita Bruta %] >= 0, "#009E49", "#E74C3C")
+
+[Detalhe CPV Industrial Desvio %] = 
+VAR _D = [Desvio CPV Industrial %]
+RETURN
+    IF(
+        ISBLANK(_D),
+        BLANK(),
+        IF(
+            _D <= 0,
+            "▼ " & FORMAT(_D, "0.0%"),
+            "▲ +" & FORMAT(_D, "0.0%")
+        )
+    )
+
+[Cor Detalhe CPV Industrial] = 
+IF([Desvio CPV Industrial %] <= 0, "#009E49", "#E74C3C")
+
+[Detalhe Margem Bruta Desvio %] = 
+VAR _D = DIVIDE([Margem Bruta Real] - [Margem Bruta Orcada], ABS([Margem Bruta Orcada]), 0)
+RETURN
+    IF(
+        ISBLANK(_D),
+        BLANK(),
+        IF(
+            _D >= 0,
+            "▲ +" & FORMAT(_D, "0.0%"),
+            "▼ " & FORMAT(_D, "0.0%")
+        )
+    )
+
+[Cor Detalhe Margem Bruta] = 
+VAR _D = DIVIDE([Margem Bruta Real] - [Margem Bruta Orcada], ABS([Margem Bruta Orcada]), 0)
+RETURN
+    IF(_D >= 0, "#009E49", "#E74C3C")
+
+[Detalhe OPEX Desvio %] = 
+VAR _D = [Desvio OPEX %]
+RETURN
+    IF(
+        ISBLANK(_D),
+        BLANK(),
+        IF(
+            _D <= 0,
+            "▼ " & FORMAT(_D, "0.0%"),
+            "▲ +" & FORMAT(_D, "0.0%")
+        )
+    )
+
+[Cor Detalhe OPEX] = 
+IF([Desvio OPEX %] <= 0, "#009E49", "#E74C3C")
+
+[Detalhe EBITDA Desvio %] = 
+VAR _D = [Desvio EBITDA Gerencial %]
+RETURN
+    IF(
+        ISBLANK(_D),
+        BLANK(),
+        IF(
+            _D >= 0,
+            "▲ +" & FORMAT(_D, "0.0%"),
+            "▼ " & FORMAT(_D, "0.0%")
+        )
+    )
+
+[Cor Detalhe EBITDA] = 
+IF([Desvio EBITDA Gerencial %] >= 0, "#009E49", "#E74C3C")
+
+[Cor Status Desvio DRE] = 
+VAR _Natureza = SELECTEDVALUE(Dim_PlanoContas[Natureza])
+VAR _Desvio = [Variancia Nominal $]
+VAR _Nivel1 = SELECTEDVALUE(Dim_PlanoContas[Nivel1])
+RETURN
+    SWITCH(
+        TRUE(),
+        _Natureza = "Credito" && _Desvio >= 0, "#009E49",
+        _Natureza = "Credito" && _Desvio < 0, "#E74C3C",
+        _Natureza = "Debito" && _Desvio <= 0, "#009E49",
+        _Natureza = "Debito" && _Desvio > 0, "#E74C3C",
+        _Nivel1 = "5. Resultado Financeiro" && _Desvio >= 0, "#009E49",
+        _Nivel1 = "5. Resultado Financeiro" && _Desvio < 0, "#E74C3C",
+        "#7F8C8D"
+    )
+
+[Cor Status Desvio YTD DRE] = 
+VAR _Natureza = SELECTEDVALUE(Dim_PlanoContas[Natureza])
+VAR _DesvioYTD = [Variancia YTD $]
+VAR _Nivel1 = SELECTEDVALUE(Dim_PlanoContas[Nivel1])
+RETURN
+    SWITCH(
+        TRUE(),
+        _Natureza = "Credito" && _DesvioYTD >= 0, "#009E49",
+        _Natureza = "Credito" && _DesvioYTD < 0, "#E74C3C",
+        _Natureza = "Debito" && _DesvioYTD <= 0, "#009E49",
+        _Natureza = "Debito" && _DesvioYTD > 0, "#E74C3C",
+        _Nivel1 = "5. Resultado Financeiro" && _DesvioYTD >= 0, "#009E49",
+        _Nivel1 = "5. Resultado Financeiro" && _DesvioYTD < 0, "#E74C3C",
+        "#7F8C8D"
+    )
+
+[Cor Status Crescimento YoY] = 
+VAR _Natureza = SELECTEDVALUE(Dim_PlanoContas[Natureza])
+VAR _VarYoY = [Variacao YoY %]
+VAR _Nivel1 = SELECTEDVALUE(Dim_PlanoContas[Nivel1])
+RETURN
+    SWITCH(
+        TRUE(),
+        _Natureza = "Credito" && _VarYoY >= 0, "#009E49",
+        _Natureza = "Credito" && _VarYoY < 0, "#E74C3C",
+        _Natureza = "Debito" && _VarYoY <= 0, "#009E49",
+        _Natureza = "Debito" && _VarYoY > 0, "#E74C3C",
+        _Nivel1 = "5. Resultado Financeiro" && _VarYoY >= 0, "#009E49",
+        _Nivel1 = "5. Resultado Financeiro" && _VarYoY < 0, "#E74C3C",
+        "#7F8C8D"
+    )
+
+[Lucro Liquido Real] = 
+VAR _Depreciacao = CALCULATE([Realizado Total], Dim_PlanoContas[ID_Conta] = "3.06.001")
+VAR _Tributos = CALCULATE([Realizado Total], Dim_PlanoContas[Nivel1] = "6. Provisao Tributaria")
+RETURN
+    ([EBITDA Gerencial Real] - _Depreciacao) + [Resultado Financeiro Real] - _Tributos
+
+[Lucro Liquido Orcado] = 
+VAR _Depreciacao = CALCULATE([Orcado Total], Dim_PlanoContas[ID_Conta] = "3.06.001")
+VAR _ResFin = CALCULATE([Orcado Total], Dim_PlanoContas[Nivel1] = "5. Resultado Financeiro")
+VAR _Tributos = CALCULATE([Orcado Total], Dim_PlanoContas[Nivel1] = "6. Provisao Tributaria")
+RETURN
+    ([EBITDA Gerencial Orcado] - _Depreciacao) + _ResFin - _Tributos
+
+[Desvio Lucro Liquido %] = 
+DIVIDE([Lucro Liquido Real] - [Lucro Liquido Orcado], ABS([Lucro Liquido Orcado]), 0)
+
+[Detalhe Lucro Liquido Desvio %] = 
+VAR _D = [Desvio Lucro Liquido %]
+RETURN
+    IF(
+        ISBLANK(_D),
+        BLANK(),
+        IF(
+            _D >= 0,
+            "▲ +" & FORMAT(_D, "0.0%"),
+            "▼ " & FORMAT(_D, "0.0%")
+        )
+    )
+
+[Cor Detalhe Lucro Liquido] = 
+IF([Desvio Lucro Liquido %] >= 0, "#009E49", "#E74C3C")
+
+[Custo MOD Fabril Orcado] = 
+CALCULATE(
+    [Orcado Total],
+    Dim_PlanoContas[ID_Conta] = "3.02.001"
+)
+
+[Desvio MOD Fabril %] = 
+DIVIDE([Custo MOD Fabril Real] - [Custo MOD Fabril Orcado], [Custo MOD Fabril Orcado], 0)
+
+[Detalhe MOD Fabril Desvio %] = 
+VAR _D = [Desvio MOD Fabril %]
+RETURN
+    IF(
+        ISBLANK(_D),
+        BLANK(),
+        IF(
+            _D <= 0,
+            "▼ " & FORMAT(_D, "0.0%"),
+            "▲ +" & FORMAT(_D, "0.0%")
+        )
+    )
+
+[Cor Detalhe MOD Fabril] = 
+IF([Desvio MOD Fabril %] <= 0, "#009E49", "#E74C3C")
+
+[Custo Caldeiras & Utilidades Orcado] = 
+CALCULATE(
+    [Orcado Total],
+    Dim_PlanoContas[ID_Conta] = "3.03.001"
+)
+
+[Desvio Caldeiras & Utilidades %] = 
+DIVIDE([Custo Caldeiras & Utilidades Real] - [Custo Caldeiras & Utilidades Orcado], [Custo Caldeiras & Utilidades Orcado], 0)
+
+[Detalhe Caldeiras & Utilidades Desvio %] = 
+VAR _D = [Desvio Caldeiras & Utilidades %]
+RETURN
+    IF(
+        ISBLANK(_D),
+        BLANK(),
+        IF(
+            _D <= 0,
+            "▼ " & FORMAT(_D, "0.0%"),
+            "▲ +" & FORMAT(_D, "0.0%")
+        )
+    )
+
+[Cor Detalhe Caldeiras & Utilidades] = 
+IF([Desvio Caldeiras & Utilidades %] <= 0, "#009E49", "#E74C3C")
+
+[Custo Fretes Porto Rio Grande Orcado] = 
+CALCULATE(
+    [Orcado Total],
+    Dim_PlanoContas[ID_Conta] = "4.01.001"
+)
+
+[Desvio Fretes Porto Rio Grande %] = 
+DIVIDE([Custo Fretes Porto Rio Grande Real] - [Custo Fretes Porto Rio Grande Orcado], [Custo Fretes Porto Rio Grande Orcado], 0)
+
+[Detalhe Fretes Porto Rio Grande Desvio %] = 
+VAR _D = [Desvio Fretes Porto Rio Grande %]
+RETURN
+    IF(
+        ISBLANK(_D),
+        BLANK(),
+        IF(
+            _D <= 0,
+            "▼ " & FORMAT(_D, "0.0%"),
+            "▲ +" & FORMAT(_D, "0.0%")
+        )
+    )
+
+[Cor Detalhe Fretes Porto Rio Grande] = 
+IF([Desvio Fretes Porto Rio Grande %] <= 0, "#009E49", "#E74C3C")
+
+
