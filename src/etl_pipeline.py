@@ -1,14 +1,6 @@
 """
 Pipeline de Engenharia de Dados e Transformação Contábil (ETL / DataOps)
-Projeto: FP&A & Controladoria Industrial
 Empresa Referência: Alliance One Brasil (Polo Venâncio Aires - RS)
-
-Este módulo orquestra o ciclo completo de dados (Bronze -> Silver -> Gold):
-1. Ingestão e extração das bases contábeis e orçamentárias brutas.
-2. Tratamento, tipagem e enriquecimento dimensional.
-3. Aplicação de regra de negócio de Rateio Contábil de Despesas Corporativas Indiretas.
-4. Carga relacional no banco de dados SQLite (fpa_industrial_dw.db) e exportação em CSV para consumo no Power BI.
-5. Registro estruturado de métricas e volumetria em logs/pipeline_fpa.log.
 """
 
 import time
@@ -24,19 +16,10 @@ def apply_corporate_cost_allocation(df_real: pd.DataFrame, df_budget: pd.DataFra
     """
     Aplica regra contábil de rateio de despesas indiretas corporativas da Sede (TI e Gestão)
     para as linhas produtivas da fábrica de Venâncio Aires.
-    
-    Regra de Negócio:
-    - 60% das despesas corporativas de TI (CC3002 / Conta 4.04.001) e Gestão (CC3001 / Conta 4.03.001)
-      são absorvidas pelos 4 centros produtivos fabris (CC1001 a CC1004) em partes iguais (15% cada).
-    - Essa transformação é gravada como lançamento de rateio interno gerencial.
     """
-    logger.info("Aplicando regra de rateio de despesas corporativas para a operação fabril de Venâncio Aires...")
-    
-    # Centros de custo produtivos que receberão a cota de rateio
     productive_ccs = ["CC1001", "CC1002", "CC1003", "CC1004"]
     corporate_support_ccs = ["CC3001", "CC3002"]
     
-    # Rateio nos Lançamentos Reais
     mask_real_corp = df_real["ID_CentroCusto"].isin(corporate_support_ccs) & df_real["ID_Conta"].isin(["4.03.001", "4.04.001"])
     corp_real_entries = df_real[mask_real_corp].copy()
     
@@ -61,15 +44,12 @@ def apply_corporate_cost_allocation(df_real: pd.DataFrame, df_budget: pd.DataFra
             
     df_allocated_real = pd.DataFrame(allocated_real_records)
     df_real_total = pd.concat([df_real, df_allocated_real], ignore_index=True)
-    
-    logger.info(f"Gerados {len(df_allocated_real)} lançamentos contábeis de rateio de despesas indiretas.")
     return df_real_total, df_budget
 
 def create_database_schema(conn: sqlite3.Connection):
     """
-    Cria a estrutura de tabelas relacionais (DDL) no SQLite.
+    Cria a estrutura de tabelas relacionais no SQLite.
     """
-    logger.info("Criando esquema relacional (Star Schema) no Data Warehouse SQLite...")
     cursor = conn.cursor()
     
     cursor.execute("""
@@ -105,15 +85,18 @@ def create_database_schema(conn: sqlite3.Connection):
     );
     """)
     
+    cursor.execute("DROP TABLE IF EXISTS Fatos_Orcamento_Planejado;")
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS Fatos_Orcamento_Planejado (
-        ID_Orcamento INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE Fatos_Orcamento_Planejado (
+        ID_Orcamento INTEGER PRIMARY KEY,
+        Data TEXT NOT NULL,
         AnoMes INTEGER NOT NULL,
         Ano INTEGER NOT NULL,
         Mes INTEGER NOT NULL,
         ID_Conta TEXT NOT NULL,
         ID_CentroCusto TEXT NOT NULL,
         Valor_Orcado REAL NOT NULL,
+        FOREIGN KEY (Data) REFERENCES Dim_Calendario(Data),
         FOREIGN KEY (ID_Conta) REFERENCES Dim_PlanoContas(ID_Conta),
         FOREIGN KEY (ID_CentroCusto) REFERENCES Dim_CentroCusto(ID_CentroCusto)
     );
@@ -135,63 +118,47 @@ def create_database_schema(conn: sqlite3.Connection):
     """)
     
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_real_data ON Fatos_Lancamentos_Realizados(Data);")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_real_conta ON Fatos_Lancamentos_Realizados(ID_Conta);")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_real_cc ON Fatos_Lancamentos_Realizados(ID_CentroCusto);")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_bgt_anomes ON Fatos_Orcamento_Planejado(AnoMes);")
-    
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_bgt_data ON Fatos_Orcamento_Planejado(Data);")
     conn.commit()
-    logger.info("Esquema DDL e índices criados com sucesso no banco de dados.")
 
 def run_etl_pipeline():
     """
-    Executa o fluxo completo do pipeline ETL de ponta a ponta.
+    Executa o pipeline ETL e atualiza Data Warehouse e CSVs.
     """
     start_time = time.time()
-    logger.info("================================================================================")
-    logger.info("INICIANDO EXECUÇÃO DO PIPELINE DE ENGENHARIA DE DADOS - ALLIANCE ONE FP&A")
-    logger.info("================================================================================")
+    logger.info("Executando ETL calibrado Alliance One...")
     
-    try:
-        df_accounts, df_cc, df_cal, df_budget, df_real = generate_fpa_data(start_year=2024, end_year=2026)
-        df_real_treated, df_budget_treated = apply_corporate_cost_allocation(df_real, df_budget)
-        
-        conn = sqlite3.connect(DB_PATH)
-        create_database_schema(conn)
-        
-        logger.info("Populando tabelas relacionais do Data Warehouse...")
-        df_accounts.to_sql("Dim_PlanoContas", conn, if_exists="replace", index=False)
-        df_cc.to_sql("Dim_CentroCusto", conn, if_exists="replace", index=False)
-        
-        df_cal_db = df_cal.copy()
-        df_cal_db["Data"] = df_cal_db["Data"].astype(str)
-        df_cal_db.to_sql("Dim_Calendario", conn, if_exists="replace", index=False)
-        
-        df_budget_treated.to_sql("Fatos_Orcamento_Planejado", conn, if_exists="replace", index=False)
-        
-        df_real_db = df_real_treated.copy()
-        df_real_db["Data"] = df_real_db["Data"].astype(str)
-        df_real_db.to_sql("Fatos_Lancamentos_Realizados", conn, if_exists="replace", index=False)
-        
-        conn.close()
-        logger.info("Carga relacional no SQLite concluída com sucesso.")
-        
-        logger.info("Exportando datasets formatados em CSV para consumo no Power BI...")
-        df_accounts.to_csv(DATA_DIR / "Dim_PlanoContas.csv", index=False, sep=";", encoding="utf-8-sig")
-        df_cc.to_csv(DATA_DIR / "Dim_CentroCusto.csv", index=False, sep=";", encoding="utf-8-sig")
-        df_cal_db.to_csv(DATA_DIR / "Dim_Calendario.csv", index=False, sep=";", encoding="utf-8-sig")
-        df_budget_treated.to_csv(DATA_DIR / "Fatos_Orcamento_Planejado.csv", index=False, sep=";", encoding="utf-8-sig")
-        df_real_db.to_csv(DATA_DIR / "Fatos_Lancamentos_Realizados.csv", index=False, sep=";", encoding="utf-8-sig")
-        
-        duration = round(time.time() - start_time, 2)
-        logger.info("================================================================================")
-        logger.info(f"PIPELINE EXECUTADO COM SUCESSO EM {duration} SEGUNDOS.")
-        logger.info(f"Total de Contas: {len(df_accounts)} | Centros de Custo: {len(df_cc)}")
-        logger.info(f"Total de Orçamentos Mensais: {len(df_budget_treated)} | Lançamentos Reais: {len(df_real_db)}")
-        logger.info("================================================================================")
-        
-    except Exception as e:
-        logger.error(f"FALHA CRÍTICA NA EXECUÇÃO DO PIPELINE: {str(e)}", exc_info=True)
-        raise e
+    df_accounts, df_cc, df_cal, df_budget, df_real = generate_fpa_data(start_year=2024, end_year=2026)
+    df_real_treated, df_budget_treated = apply_corporate_cost_allocation(df_real, df_budget)
+    
+    conn = sqlite3.connect(DB_PATH)
+    create_database_schema(conn)
+    
+    df_accounts.to_sql("Dim_PlanoContas", conn, if_exists="replace", index=False)
+    df_cc.to_sql("Dim_CentroCusto", conn, if_exists="replace", index=False)
+    
+    df_cal_db = df_cal.copy()
+    df_cal_db["Data"] = df_cal_db["Data"].astype(str)
+    df_cal_db.to_sql("Dim_Calendario", conn, if_exists="replace", index=False)
+    
+    df_bgt_db = df_budget_treated.copy()
+    df_bgt_db["Data"] = df_bgt_db["Data"].astype(str)
+    df_bgt_db.to_sql("Fatos_Orcamento_Planejado", conn, if_exists="replace", index=False)
+    
+    df_real_db = df_real_treated.copy()
+    df_real_db["Data"] = df_real_db["Data"].astype(str)
+    df_real_db.to_sql("Fatos_Lancamentos_Realizados", conn, if_exists="replace", index=False)
+    
+    conn.close()
+    
+    # Exportação em CSV
+    df_accounts.to_csv(DATA_DIR / "Dim_PlanoContas.csv", index=False, sep=";", encoding="utf-8-sig")
+    df_cc.to_csv(DATA_DIR / "Dim_CentroCusto.csv", index=False, sep=";", encoding="utf-8-sig")
+    df_cal_db.to_csv(DATA_DIR / "Dim_Calendario.csv", index=False, sep=";", encoding="utf-8-sig")
+    df_bgt_db.to_csv(DATA_DIR / "Fatos_Orcamento_Planejado.csv", index=False, sep=";", encoding="utf-8-sig")
+    df_real_db.to_csv(DATA_DIR / "Fatos_Lancamentos_Realizados.csv", index=False, sep=";", encoding="utf-8-sig")
+    
+    logger.info(f"ETL calibrado concluído em {round(time.time() - start_time, 2)}s.")
 
 if __name__ == "__main__":
     run_etl_pipeline()

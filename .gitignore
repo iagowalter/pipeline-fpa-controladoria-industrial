@@ -1,0 +1,29 @@
+# Ambiente Python e Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Variaveis de Ambiente e Credenciais
+.env
+
+# Logs de Execucao Local
+logs/*.log
+!logs/.gitkeep
+
+# Arquivos Binarios e Bancos Locais
+*.db
+*.sqlite
+*.sqlite3
+
+# Arquivos de Dados Brutos / Grandes Binarios
+# data/*.csv
+# bi/*.pbix
+
+# IDEs e Editores
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

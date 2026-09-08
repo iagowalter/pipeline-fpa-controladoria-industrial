@@ -1,24 +1,24 @@
-﻿ID_Conta;Nome_Conta;Nivel1;Nivel2;Natureza;Ordem_DRE
-1.01.001;Exportacao Tabaco Processado - Strips Virginia;1. Receita Bruta;Receita de Exportacao;Credito;1
-1.01.002;Exportacao Tabaco Processado - Strips Burley;1. Receita Bruta;Receita de Exportacao;Credito;2
-1.01.003;Exportacao de By-Products (Stems/Talas e Fumos Picados);1. Receita Bruta;Receita de Exportacao;Credito;3
-1.02.001;Vendas no Mercado Interno e Amostras Comerciais;1. Receita Bruta;Receita Mercado Interno;Credito;4
-2.01.001;Tributos sobre Faturamento Interno (PIS/COFINS/ICMS);2. Deducoes da Receita;Impostos Incidentes;Debito;5
-2.02.001;Descontos Comerciais e Reclamacoes de Umidade/Qualidade;2. Deducoes da Receita;Cancelamentos e Abatimentos;Debito;6
-3.01.001;Aquisicao de Tabaco Cru (Produtores Integrados Sul);3. Custo Industrial (CPV);Materia-Prima Direta;Debito;7
-3.02.001;Mao de Obra Direta Fabril (Linhas Threshing e Prensas);3. Custo Industrial (CPV);Mao de Obra Fabril;Debito;8
-3.03.001;Utilidades Industriais (Caldeiras a Biomassa, Vapor e Energia);3. Custo Industrial (CPV);Utilidades Fabris;Debito;9
-3.04.001;Embalagens de Exportacao (Caixas C-48, Liners e Cintas);3. Custo Industrial (CPV);Embalagens e Insumos;Debito;10
-3.05.001;Manutencao Industrial Preditiva das Linhas de Debulha;3. Custo Industrial (CPV);Manutencao Fabril;Debito;11
-3.06.001;Depreciacao Fabril (Linhas Threshing, Redryers e Silos);3. Custo Industrial (CPV);Depreciacao Fabril;Debito;12
-4.01.001;Fretes Rodoviarios (Venancio Aires -> Porto de Rio Grande);4. Despesas Operacionais (OPEX);Logistica e Exportacao;Debito;13
-4.01.002;Custos Portuarios, Estufagem e Terminal Alfandegado;4. Despesas Operacionais (OPEX);Logistica e Exportacao;Debito;14
-4.02.001;Assistente Tecnico de Campo e Programa STP (Agronomia/ESG);4. Despesas Operacionais (OPEX);Agronomia e Sustentabilidade;Debito;15
-4.03.001;Folha de Pagamento Administrativa e Gestao Corporativa;4. Despesas Operacionais (OPEX);Despesas Corporativas;Debito;16
-4.04.001;Tecnologia da Informacao, ERP e Automacao Fabril;4. Despesas Operacionais (OPEX);Tecnologia da Informacao;Debito;17
-4.05.001;Laudos Fitossanitarios, Laboratorio de Fumo e Qualidade;4. Despesas Operacionais (OPEX);Qualidade e Laboratorio;Debito;18
-4.06.001;Mesa Comercial Internacional e Negociacao de Safras;4. Despesas Operacionais (OPEX);Comercial e Vendas;Debito;19
-5.01.001;Variacao Cambial Liquida (Contratos de Exportacao USD);5. Resultado Financeiro;Efeito Cambial;Credito;20
-5.02.001;Juros e Despesas com Antecipacao Cambial (ACC / ACE);5. Resultado Financeiro;Despesas Bancarias;Debito;21
-5.03.001;Rendimento de Aplicacoes Financeiras de Tesouraria;5. Resultado Financeiro;Receitas Financeiras;Credito;22
-6.01.001;Provisao de IRPJ e CSLL;6. Provisao Tributaria;Impostos Diretos;Debito;23
+﻿ID_Conta;Nome_Conta;Nome_Produto_Curto;Nivel1;Nivel2;Natureza;Ordem_DRE
+1.01.001;Exportacao Tabaco Processado - Strips Virginia;Strips Virgínia;1. Receita Bruta;Receita de Exportacao;Credito;1
+1.01.002;Exportacao Tabaco Processado - Strips Burley;Strips Burley;1. Receita Bruta;Receita de Exportacao;Credito;2
+1.01.003;Exportacao de By-Products (Stems/Talas e Fumos Picados);By-Products & Talas;1. Receita Bruta;Receita de Exportacao;Credito;3
+1.02.001;Vendas no Mercado Interno e Amostras Comerciais;Mercado Interno;1. Receita Bruta;Receita Mercado Interno;Credito;4
+2.01.001;Tributos sobre Faturamento Interno (PIS/COFINS/ICMS);Tributos sobre Vendas;2. Deducoes da Receita;Impostos Incidentes;Debito;5
+2.02.001;Descontos Comerciais e Reclamacoes de Umidade/Qualidade;Descontos Comerciais;2. Deducoes da Receita;Cancelamentos e Abatimentos;Debito;6
+3.01.001;Aquisicao de Tabaco Cru (Produtores Integrados Sul);Matéria-Prima Safra;3. Custo Industrial (CPV);Materia-Prima Direta;Debito;7
+3.02.001;Mao de Obra Direta Fabril (Linhas Threshing e Prensas);Mão de Obra Fabril;3. Custo Industrial (CPV);Mao de Obra Fabril;Debito;8
+3.03.001;Utilidades Industriais (Caldeiras a Biomassa, Vapor e Energia);Caldeiras & Energia;3. Custo Industrial (CPV);Utilidades Fabris;Debito;9
+3.04.001;Embalagens de Exportacao (Caixas C-48, Liners e Cintas);Caixas C-48 & Insumos;3. Custo Industrial (CPV);Embalagens e Insumos;Debito;10
+3.05.001;Manutencao Industrial Preditiva das Linhas de Debulha;Manutenção Threshing;3. Custo Industrial (CPV);Manutencao Fabril;Debito;11
+3.06.001;Depreciacao Fabril (Linhas Threshing, Redryers e Silos);Depreciação Fabril;3. Custo Industrial (CPV);Depreciacao Fabril;Debito;12
+4.01.001;Fretes Rodoviarios (Venancio Aires -> Porto de Rio Grande);Fretes Porto Rio Grande;4. Despesas Operacionais (OPEX);Logistica e Exportacao;Debito;13
+4.01.002;Custos Portuarios, Estufagem e Terminal Alfandegado;Terminal Portuário;4. Despesas Operacionais (OPEX);Logistica e Exportacao;Debito;14
+4.02.001;Assistente Tecnico de Campo e Programa STP (Agronomia/ESG);Agronomia / STP;4. Despesas Operacionais (OPEX);Agronomia e Sustentabilidade;Debito;15
+4.03.001;Folha de Pagamento Administrativa e Gestao Corporativa;Administrativo & Gestão;4. Despesas Operacionais (OPEX);Despesas Corporativas;Debito;16
+4.04.001;Tecnologia da Informacao, ERP e Automacao Fabril;TI & Automação;4. Despesas Operacionais (OPEX);Tecnologia da Informacao;Debito;17
+4.05.001;Laudos Fitossanitarios, Laboratorio de Fumo e Qualidade;Laboratório & Qualidade;4. Despesas Operacionais (OPEX);Qualidade e Laboratorio;Debito;18
+4.06.001;Mesa Comercial Internacional e Negociacao de Safras;Comercial & Vendas;4. Despesas Operacionais (OPEX);Comercial e Vendas;Debito;19
+5.01.001;Variacao Cambial Liquida (Contratos de Exportacao USD);Variação Cambial;5. Resultado Financeiro;Efeito Cambial;Credito;20
+5.02.001;Juros e Despesas com Antecipacao Cambial (ACC / ACE);Despesas Bancárias / ACC;5. Resultado Financeiro;Despesas Bancarias;Debito;21
+5.03.001;Rendimento de Aplicacoes Financeiras de Tesouraria;Rendimentos Tesouraria;5. Resultado Financeiro;Receitas Financeiras;Credito;22
+6.01.001;Provisao de IRPJ e CSLL;Provisão IRPJ/CSLL;6. Provisao Tributaria;Impostos Diretos;Debito;23
